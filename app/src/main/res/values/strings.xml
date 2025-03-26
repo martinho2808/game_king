@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">gema_king</string>
+    <string name="main_txt">Main Page</string>
+
+    /* Setting Menu */
+    <string name="txt_setting">Setting</string>
+
+    /* Login Page to store string */
+    <string name="login_txt_title">Login Page</string>
+    <string name="login_txt_login">Login</string>
+    <string name="login_txt_signup">Sign up</string>
+    /* Register Page to store string */
+    <string name="register_txt_title">Register Page</string>
+    <string name="register_txt_register">Register</string>
+
+
+    <string name="language_txt_title">Language Page</string>
+
+    <string name="game1_txt_title">Game1 Page</string>
+    <string name="game2_txt_title">Game2 Page</string>
+    <string name="game3_txt_title">Game3 Page</string>
+    <string name="game4_txt_title">Game4 Page</string>
+    <string name="game5_txt_title">Game5 Page</string>
+    <string name="game6_txt_title">Game6 Page</string>
+    <string name="game7_txt_title">Game7 Page</string>
+
+
+    /* Public Area to store string */
+    <string name="txt_cfm">Confirm</string>
+    <string name="txt_cancel">Cancel</string>
+    <string name="txt_next">Next</string>
+
+
+
+</resources>
