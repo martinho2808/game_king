@@ -15,8 +15,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-    Button sign_up = (Button) findViewById(R.id.login_btn_signup);
-    Button login = (Button) findViewById(R.id.login_btn_login);
+    Button sign_up;
+    Button login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +30,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         Toast.makeText(this, "Welcome to Game King", Toast.LENGTH_LONG).show();
+
+        sign_up = (Button) findViewById(R.id.login_btn_signup);;
+        login = (Button) findViewById(R.id.login_btn_login);
 
         sign_up.setOnClickListener(this);
         login.setOnClickListener(this);
