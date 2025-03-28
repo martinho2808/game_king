@@ -5,10 +5,14 @@
     /* Setting Menu */
     <string name="txt_setting">Setting</string>
 
-    /* Login Page to store string */
-    <string name="login_txt_title">Login Page</string>
+<!--    Main page-->
+    <string name="main_page">Main Page</string>
     <string name="login_txt_login">Login</string>
     <string name="login_txt_signup">Sign up</string>
+
+
+    /* Login Page to store string */
+    <string name="login_txt_title">Login Page</string>
     /* Register Page to store string */
     <string name="register_txt_title">Register Page</string>
     <string name="register_txt_register">Register</string>
