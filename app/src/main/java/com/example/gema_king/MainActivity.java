@@ -15,7 +15,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
-
     Button sign_up = (Button) findViewById(R.id.login_btn_signup);
     Button login = (Button) findViewById(R.id.login_btn_login);
 
@@ -34,6 +33,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         sign_up.setOnClickListener(this);
         login.setOnClickListener(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
     }
 
     @Override
