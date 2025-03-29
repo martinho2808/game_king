@@ -1,17 +1,28 @@
 <resources>
-    <string name="app_name">gema_king</string>
+    <string name="app_name">Game King</string>
     <string name="main_txt">Main Page</string>
 
     /* Setting Menu */
     <string name="txt_setting">Setting</string>
 
-    /* Login Page to store string */
-    <string name="login_txt_title">Login Page</string>
+    <!--    Main page-->
+    <string name="main_page">Main Page</string>
     <string name="login_txt_login">Login</string>
     <string name="login_txt_signup">Sign up</string>
+
+
+    /* Login Page to store string */
+    <string name="login_txt_title">Login Page</string>
     /* Register Page to store string */
-    <string name="register_txt_title">Register Page</string>
-    <string name="register_txt_register">Register</string>
+    <string name="title">Register new account</string>
+    <string name="username">Username</string>
+    <string name="age">Age</string>
+    <string name="password">Password</string>
+    <string name="confirm">Confirm Password</string>
+    <string name="email">Email</string>
+    <string name="required">-required fields</string>
+    <string name="register">REGISTER</string>
+    <string name="cancel">or Cancel</string>
 
 
     <string name="language_txt_title">Language Page</string>
@@ -29,7 +40,6 @@
     <string name="txt_cfm">Confirm</string>
     <string name="txt_cancel">Cancel</string>
     <string name="txt_next">Next</string>
-
 
 
 </resources>
