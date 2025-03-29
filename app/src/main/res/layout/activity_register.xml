@@ -58,7 +58,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/textView"
+                        android:id="@+id/textView_username"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="*"
@@ -102,7 +102,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/textView"
+                        android:id="@+id/textView_mark"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="*"
@@ -143,7 +143,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/textView"
+                        android:id="@+id/textView_password"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="*"
@@ -158,7 +158,7 @@
                     android:layout_height="40dp"
                     android:background="#FFF"
                     android:ems="10"
-                    android:inputType="numberPassword" />
+                    android:inputType="textPassword" />
             </LinearLayout>
 
             <LinearLayout
@@ -184,7 +184,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/textView"
+                        android:id="@+id/textView_password_confirm"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="*"
@@ -194,12 +194,12 @@
                 </LinearLayout>
 
                 <EditText
-                    android:id="@+id/editTextText2"
+                    android:id="@+id/passwordConfirmInput"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:background="#FFF"
                     android:ems="10"
-                    android:inputType="numberPassword" />
+                    android:inputType="textPassword" />
             </LinearLayout>
 
             <LinearLayout
@@ -256,7 +256,7 @@
             android:gravity="center">
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btn_register"
                 style="@style/Widget.Material3.Button.TonalButton.Icon"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
@@ -265,8 +265,9 @@
                 android:textColor="#FFFEFE"
                 android:textStyle="bold" />
 
+
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/linkTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="10dp"
