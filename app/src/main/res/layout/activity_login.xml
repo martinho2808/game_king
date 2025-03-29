@@ -57,7 +57,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/textView"
+                        android:id="@+id/textView3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="*"
@@ -116,7 +116,7 @@
                     android:layout_height="40dp"
                     android:background="#FFF"
                     android:ems="10"
-                    android:inputType="numberPassword" />
+                    android:inputType="textPassword" />
             </LinearLayout>
 
 
@@ -125,7 +125,7 @@
 
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/btn_login"
             style="@style/Widget.Material3.Button.TonalButton.Icon"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
