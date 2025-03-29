@@ -2,6 +2,7 @@ package com.example.gema_king;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,6 +28,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     String password;
     String passwordConfirm;
     String email;
+
+    private static final String TAG = "Registration";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,13 +70,18 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         TextView textview_password_confirm = (TextView) findViewById(R.id.passwordConfirmInput);
         TextView textview_email = (TextView) findViewById(R.id.emailInput);
 
-        username = (String) textview_username.getText();
-        age = Integer.parseInt((String) textview_age.getText());
-        password = (String) textview_password.getText();
-        passwordConfirm = (String) textview_password_confirm.getText();
-        email = (String) textview_email.getText();
+        Log.i(TAG, "Received username and password");
+
+        username = textview_username.getText().toString();
+        age = Integer.parseInt(textview_age.getText().toString());
+        password = textview_password.getText().toString();
+        passwordConfirm = textview_password_confirm.getText().toString();
+        email = textview_email.getText().toString();
+
+        Log.i(TAG, "Converted username and password");
 
         //Insert data
         dbHelper.insertData(username, age, password, email);
+        Log.i(TAG, "Converted username and password");
     }
 }

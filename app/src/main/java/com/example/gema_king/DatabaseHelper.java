@@ -2,6 +2,7 @@ package com.example.gema_king;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -47,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void insertData(String username, int age, String password, String email) {
         SQLiteDatabase db = this.getWritableDatabase();
+        long newRowId;
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_USERNAME, username);
@@ -55,7 +57,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_EMAIL, email);
 
         try {
-            long newRowId = db.insert(TABLE_NAME, null, values);
+            newRowId = db.insert(TABLE_NAME, null, values);
+            Log.d(TAG, String.valueOf(newRowId));
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -63,5 +66,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    
+    public boolean readData(String username, String password) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = String.format("SELECT COUNT(*) FROM %s WHERE username = '%s' AND password = '%s';", TABLE_NAME, username, password);
+        Cursor cursor = db.rawQuery(query, null);
+
+        int count;
+
+        cursor.moveToFirst();
+        count = cursor.getInt(0);
+        if (count >= 1) {
+            cursor.close();
+            db.close();
+            return true;
+        }
+
+        Log.d("Count", "Number of rows: " + count);
+
+        cursor.close();
+        db.close();
+
+        return false;
+    }
 }
