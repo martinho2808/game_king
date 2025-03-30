@@ -2,11 +2,9 @@ package com.example.gema_king;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,7 +14,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import org.w3c.dom.Text;
+import com.example.gema_king.database.DatabaseHelper;
+import com.example.gema_king.database.dao.LoginDao;
+import com.example.gema_king.database.dao.UserDao;
+import com.example.gema_king.model.UserSession;
+import com.example.gema_king.utils.Navigator;
+
+import java.util.Map;
 
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
@@ -62,13 +66,26 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Log.i(TAG, "Converted username and password");
 
 
-        boolean check = dbHelper.readData(verify_username, verify_password);
-
+        //boolean check = dbHelper.readData(verify_username, verify_password);
+        long userId = LoginDao.loginValidate(this, verify_username, verify_password);
+        Map<String, Object> userData = UserDao.getUserData(this, userId);
         Log.i(TAG, "Checked");
 
-        if (check) {
-            Intent i = new Intent(LoginActivity.this, GameActivity.class);
-            startActivity(i);
+        if (userId != -1) {
+            UserDao.getUserData(this, userId);
+            if (userData != null) {
+                long id = (long) userData.get("id");
+                String username = (String) userData.get("username");
+                int age = (int) userData.get("age");
+                String email = (String) userData.get("email");
+
+                //Save User Session
+                UserSession.getInstance().saveUserSession(this, id, username, age, email);
+
+            } else {
+                Log.d(TAG, "User not found.");
+            }
+            Navigator.navigateTo(LoginActivity.this, GameActivity.class);
         } else {
             Toast.makeText(LoginActivity.this, "Invalid username or password", Toast.LENGTH_LONG).show();
         }

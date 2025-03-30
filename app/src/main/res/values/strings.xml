@@ -40,6 +40,7 @@
     <string name="txt_cfm">Confirm</string>
     <string name="txt_cancel">Cancel</string>
     <string name="txt_next">Next</string>
+    <string name="title_activity_menu">MenuActivity</string>
 
 
 </resources>

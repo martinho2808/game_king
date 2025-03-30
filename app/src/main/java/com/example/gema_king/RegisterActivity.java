@@ -1,11 +1,9 @@
 package com.example.gema_king;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -13,9 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import com.example.gema_king.DatabaseHelper;
-
-import org.w3c.dom.Text;
+import com.example.gema_king.database.DatabaseHelper;
+import com.example.gema_king.database.dao.UserDao;
+import com.example.gema_king.utils.Navigator;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -55,8 +53,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         if (v.getId() == btnregister.getId()) {
             insert();
         }
-        Intent i = new Intent(RegisterActivity.this, MainActivity.class);
-        startActivity(i);
+        Navigator.navigateTo(RegisterActivity.this, MainActivity.class);
     }
 
     public void insert() {
@@ -81,7 +78,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         Log.i(TAG, "Converted username and password");
 
         //Insert data
-        dbHelper.insertData(username, age, password, email);
+        //dbHelper.insertData(username, age, password, email);
+
+        UserDao.insertUserData(this, username, age, password, email);
+
         Log.i(TAG, "Converted username and password");
     }
 }
