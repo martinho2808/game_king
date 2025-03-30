@@ -14,34 +14,51 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+import com.example.gema_king.model.UserSession;
+import com.example.gema_king.utils.Navigator;
+
+import org.json.JSONObject;
+
+public class MainActivity extends MenuActivity implements View.OnClickListener{
     Button sign_up;
     Button login;
-
+    private static final String TAG = "MainActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
-        Toast.makeText(this, "Welcome to Game King", Toast.LENGTH_LONG).show();
+        //Get session
+        JSONObject userSession = UserSession.getInstance().getUserSession(this);
+        if (userSession != null) {
+            try {
+                String username = userSession.getString("username");
+                Toast.makeText(this, "Welcome to Game King, " + username, Toast.LENGTH_LONG).show();
+                Navigator.navigateTo(MainActivity.this, GameActivity.class);
+                finish(); // End the current page to prevent the user from returning to the login page
 
-        sign_up = (Button) findViewById(R.id.login_btn_signup);;
-        login = (Button) findViewById(R.id.login_btn_login);
+            } catch (Exception e) {
+                UserSession.getInstance().clearUserSession(this);
+                Log.e(TAG, "Error retrieving user session data: " + e.getMessage());
+            }
+        } else {
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
 
-        sign_up.setOnClickListener(this);
-        login.setOnClickListener(this);
-    }
+            Toast.makeText(this, "Welcome to Game King", Toast.LENGTH_LONG).show();
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
+            sign_up = (Button) findViewById(R.id.login_btn_signup);;
+            login = (Button) findViewById(R.id.login_btn_login);
+
+            sign_up.setOnClickListener(this);
+            login.setOnClickListener(this);
+        }
+
+
     }
 
     @Override
