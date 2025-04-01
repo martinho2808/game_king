@@ -4,6 +4,9 @@
 
     /* Setting Menu */
     <string name="txt_setting">Setting</string>
+    <string name="txt_logout">Logout</string>
+    <string name="txt_leaderboard">LeaderBoard</string>
+    <string name="txt_login">Login</string>
 
     <!--    Main page-->
     <string name="main_page">Main Page</string>
@@ -27,6 +30,8 @@
 
     <string name="language_txt_title">Language Page</string>
 
+
+    <string name="txt_start_game">Start Game</string>
     <string name="game1_txt_title">Game1 Page</string>
     <string name="game2_txt_title">Game2 Page</string>
     <string name="game3_txt_title">Game3 Page</string>
