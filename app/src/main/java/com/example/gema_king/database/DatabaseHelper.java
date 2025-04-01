@@ -25,11 +25,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Table columns
     private static final String GAME_STATUS_COLUMN_ID = "id";
-    private static final String GAME_STATUS_COLUMN_USER_ID = "user_id"; // 關聯到用戶表
-    private static final String GAME_STATUS_COLUMN_GAME_ID = "game_id"; // 遊戲名稱
-    private static final String GAME_STATUS_COLUMN_SCORE = "score"; // 分數
-    private static final String GAME_STATUS_COLUMN_PLAY_TIME = "play_time"; // 遊玩時間
-    private static final String GAME_STATUS_COLUMN_STATUS = "status"; // 遊戲狀態
+    private static final String GAME_STATUS_COLUMN_USER_ID = "user_id";
+    private static final String GAME_STATUS_COLUMN_GAME_ID = "game_id";
+    private static final String GAME_STATUS_COLUMN_SCORE = "score";
+    private static final String GAME_STATUS_COLUMN_PLAY_TIME = "play_time";
+    private static final String GAME_STATUS_COLUMN_STATUS = "status";
     //    SQL query to create table
     private static final String CREATE_TABLE = "CREATE TABLE " + USER_TABLE_NAME +
     " ("

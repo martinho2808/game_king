@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import com.example.gema_king.model.UserSession;
 import com.example.gema_king.utils.Navigator;
 
+import org.json.JSONObject;
+
 public class MenuActivity extends AppCompatActivity {
 
     @Override
@@ -24,8 +26,13 @@ public class MenuActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        JSONObject userSession = UserSession.getInstance().getUserSession(this);
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu); // 替換為你的菜單文件名
+        if( userSession != null) {
+            inflater.inflate(R.menu.user_menu, menu);
+        } else {
+            inflater.inflate(R.menu.main_menu, menu);
+        }
         return true;
     }
 
@@ -36,11 +43,14 @@ public class MenuActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.action_login) {
             //Temp use for logout
-            UserSession.getInstance().clearUserSession(this);
-            Navigator.navigateTo(this, MainActivity.class);
+
 
 
             // handle Login
+            return true;
+        } else if (item.getItemId() == R.id.action_logout){
+            UserSession.getInstance().clearUserSession(this);
+            Navigator.navigateTo(this, MainActivity.class);
             return true;
         } else {
             return super.onOptionsItemSelected(item);

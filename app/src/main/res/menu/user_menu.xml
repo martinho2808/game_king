@@ -9,8 +9,8 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_login"
-        android:title="@string/txt_login"
-        android:icon="@drawable/login_logo"
+        android:id="@+id/action_logout"
+        android:title="@string/txt_logout"
+        android:icon="@drawable/logout_logo"
         app:showAsAction="always" />
 </menu>
