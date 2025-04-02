@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 基礎顏色 -->
+    <color name="primary">#FF6200EE</color>
+    <color name="primary_dark">#FF3700B3</color>
+    <color name="primary_variant">#7E57C2</color>
+    <color name="secondary">#FF03DAC5</color>
+    <color name="secondary_dark">#018786</color>
+
+    <!-- Material Design 預設顏色 -->
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC6</color>
+    <color name="teal_700">#018786</color>
+
+    <!-- 背景顏色 -->
+    <color name="background">#FF121212</color>
+    <color name="surface">#FF121212</color>
+    <color name="dialog_background">#2D2D2D</color>
+
+    <!-- 文字顏色 -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="text_hint">#80FFFFFF</color>
+
+    <!-- 按鈕顏色 -->
+    <color name="button_primary">#6200EE</color>
+    <color name="button_secondary">#FF5722</color>
+    <color name="button_cancel">#424242</color>
+    <color name="button_disabled">#66FFFFFF</color>
+
+    <!-- 輸入框顏色 -->
+    <color name="input_background">#1AFFFFFF</color>
+    <color name="input_stroke">#33FFFFFF</color>
+    <color name="input_stroke_focused">#6200EE</color>
+
+    <!-- 錯誤和警告顏色 -->
+    <color name="error">#FFCF6679</color>
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FFA000</color>
+
+    <!-- 半透明遮罩 -->
+    <color name="scrim">#52000000</color>
+
+    <!-- 系統顏色 -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- 新增卡片背景顏色 -->
+    <color name="card_background">#1AFFFFFF</color>
+
+    <!-- 新增進度條背景和進度顏色 -->
+    <color name="progress_background">#1AFFFFFF</color>
+    <color name="progress_color">#FF03DAC5</color>
+
+    <!-- 新增禁用狀態的顏色定義 -->
+    <color name="disabled_color">#808080</color>
+</resources>
