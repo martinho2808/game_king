@@ -4,13 +4,31 @@
 
     <item
         android:id="@+id/action_leaderboard"
-        android:title="@string/txt_leaderboard"
-        android:icon="@drawable/leaderboard_logo"
+        android:icon="@drawable/ic_leaderboard_24dp"
+        android:title="@string/leaderboard"
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_login"
-        android:title="@string/txt_login"
-        android:icon="@drawable/login_logo"
-        app:showAsAction="always" />
+        android:id="@+id/action_overflow"
+        android:icon="@drawable/ic_more_vert"
+        android:title="@string/more_options"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                android:id="@+id/action_settings"
+                android:icon="@drawable/ic_settings_24dp"
+                android:title="@string/settings" />
+
+            <item
+                android:id="@+id/action_language"
+                android:icon="@drawable/ic_language"
+                android:title="@string/language" />
+
+            <item
+                android:id="@+id/action_logout"
+                android:icon="@drawable/ic_logout_24dp"
+                android:title="@string/logout" />
+        </menu>
+    </item>
 </menu>

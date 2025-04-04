@@ -1,51 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Game King</string>
-    <string name="main_txt">Main Page</string>
+    <string name="app_name">遊戲王</string>
+    <string name="main_page">遊戲王</string>
+    <string name="welcome_message">歡迎來到遊戲王</string>
+    <string name="settings">設置</string>
+    <string name="language">語言</string>
+    <string name="switch_to_chinese">切換到中文</string>
+    <string name="switch_to_english">切換到英文</string>
+    <string name="sound">音效</string>
+    <string name="music">音樂</string>
+    <string name="volume">音量</string>
+    <string name="ok">確定</string>
+    <string name="cancel">取消</string>
+    <string name="register">註冊</string>
+    <string name="login">登入</string>
+    <string name="username">用戶名</string>
+    <string name="password">密碼</string>
+    <string name="confirm_password">確認密碼</string>
+    <string name="email">電子郵件</string>
+    <string name="age">年齡</string>
+    <string name="already_have_account">已有帳號？點擊登入</string>
+    <string name="signup_title">註冊新帳號</string>
+    <string name="username_required">請輸入用戶名</string>
+    <string name="password_required">請輸入密碼</string>
+    <string name="confirm_password_required">請確認密碼</string>
+    <string name="email_required">請輸入電子郵件</string>
+    <string name="age_required">請輸入年齡</string>
+    <string name="invalid_age">請輸入有效年齡（1-120）</string>
+    <string name="password_too_short">密碼至少需要6個字符</string>
+    <string name="passwords_not_match">兩次輸入的密碼不一致</string>
+    <string name="invalid_email">請輸入有效的電子郵件地址</string>
+    <string name="registration_success">註冊成功</string>
+    <string name="login_success">登入成功</string>
+    <string name="invalid_credentials">用戶名或密碼錯誤</string>
+    
+    <!-- 新增缺少的字符串資源 -->
+    <string name="login_txt_signup">註冊</string>
+    <string name="login_txt_login">登入</string>
+    <string name="required">必填欄位</string>
+    <string name="background_music">背景音樂</string>
+    <string name="game_sound">遊戲音效</string>
+    <string name="leaderboard">排行榜</string>
+    <string name="logout">登出</string>
+    <string name="logging_in">登入中...</string>
+    <string name="username_exists">用戶名已存在</string>
+    <string name="registration_failed">註冊失敗：%s</string>
+    <string name="login_txt_title">登入</string>
+    <string name="switch_language">切換語言</string>
+    <string name="change_language">切換語言</string>
+    <string name="close">關閉</string>
 
-    /* Setting Menu */
-    <string name="txt_setting">Setting</string>
-    <string name="txt_logout">Logout</string>
-    <string name="txt_leaderboard">LeaderBoard</string>
-    <string name="txt_login">Login</string>
+    <!-- 新增遊戲相關字符串 -->
+    <string name="more_options">更多選項</string>
+    <string name="level">等級</string>
+    <string name="level_progress">等級進度</string>
+    <string name="menu_settings">設置</string>
+    <string name="menu_language">語言</string>
+    <string name="menu_logout">登出</string>
 
-    <!--    Main page-->
-    <string name="main_page">Main Page</string>
-    <string name="login_txt_login">Login</string>
-    <string name="login_txt_signup">Sign up</string>
+    <!-- 主頁面文字 -->
+    <string name="app_title">遊戲王</string>
+    <string name="player_age">年齡: %d</string>
+    <string name="player_level">等級: %d</string>
+    <string name="game_progress">遊戲進度</string>
+    <string name="games_played">遊戲次數</string>
+    <string name="win_rate">勝率</string>
+    <string name="start_game">開始遊戲</string>
+    <string name="test_player">測試玩家</string>
+    <string name="age_format">年齡：%d</string>
+    <string name="level_format">等級：%d</string>
 
+    <!-- 遊戲狀態相關 -->
+    <string name="recent_games">最近遊戲</string>
+    <string name="game_status">遊戲狀態</string>
+    <string name="score">分數</string>
+    <string name="play_time">遊戲時間</string>
+    <string name="status_win">勝利</string>
+    <string name="status_lose">失敗</string>
+    <string name="status_draw">平局</string>
+    <string name="play_date">遊戲日期</string>
+    <string name="minutes">分鐘</string>
+    <string name="hours">小時</string>
+    <string name="total_games">總場數：%d</string>
+    <string name="win_rate_format">勝率：%.1f%%</string>
+    <string name="level_progress_format">等級進度：%d%%</string>
+    <string name="select_language">選擇語言</string>
+    <string name="english">英文</string>
+    <string name="chinese">中文</string>
 
-    /* Login Page to store string */
-    <string name="login_txt_title">Login Page</string>
-    /* Register Page to store string */
-    <string name="title">Register new account</string>
-    <string name="username">Username</string>
-    <string name="age">Age</string>
-    <string name="password">Password</string>
-    <string name="confirm">Confirm Password</string>
-    <string name="email">Email</string>
-    <string name="required">-required fields</string>
-    <string name="register">REGISTER</string>
-    <string name="cancel">or Cancel</string>
+    <!-- 新增遊戲相關字符串 -->
+    <string name="player_name">玩家名稱</string>
 
+    <!-- 遊戲進度相關 -->
+    <string name="total_play_time_format">%d 小時 %d 分鐘</string>
+    <string name="total_play_time_minutes">%d 分鐘</string>
+    <string name="total_play_time">遊戲時間</string>
+    <string name="highest_score">最高分數</string>
+    <string name="game_state">遊戲狀態</string>
+    <string name="state_ready">準備就緒</string>
 
-    <string name="language_txt_title">Language Page</string>
-
-
-    <string name="txt_start_game">Start Game</string>
-    <string name="game1_txt_title">Game1 Page</string>
-    <string name="game2_txt_title">Game2 Page</string>
-    <string name="game3_txt_title">Game3 Page</string>
-    <string name="game4_txt_title">Game4 Page</string>
-    <string name="game5_txt_title">Game5 Page</string>
-    <string name="game6_txt_title">Game6 Page</string>
-    <string name="game7_txt_title">Game7 Page</string>
-
-
-    /* Public Area to store string */
-    <string name="txt_cfm">Confirm</string>
-    <string name="txt_cancel">Cancel</string>
-    <string name="txt_next">Next</string>
-    <string name="title_activity_menu">MenuActivity</string>
-
-
+    <!-- 新增等級和經驗值相關的文字資源 -->
+    <string name="level_text">等級: %d</string>
+    <string name="experience_text">距離下一級還需要: %d 經驗值</string>
 </resources>
