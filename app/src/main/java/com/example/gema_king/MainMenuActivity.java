@@ -1,5 +1,6 @@
 package com.example.gema_king;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,8 +25,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.example.gema_king.database.DatabaseHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.example.gema_king.database.dao.UserDao;
 
 import java.util.Locale;
 
@@ -46,13 +50,12 @@ public class MainMenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_menu);
 
-        // 初始化數據庫
-        dbHelper = new DatabaseHelper(this);
         
         // 初始化音效管理器
         soundManager = SoundManager.getInstance(this);
         soundManager.startBGM();
 
+        dbHelper = new DatabaseHelper(this);
         // 初始化視圖
         initViews();
         setupToolbar();
@@ -81,7 +84,7 @@ public class MainMenuActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
     }
-
+    @SuppressLint("Range")
     private void loadPlayerData() {
         try {
             SharedPreferences prefs = getSharedPreferences("GameKing", MODE_PRIVATE);
@@ -104,7 +107,7 @@ public class MainMenuActivity extends AppCompatActivity {
                 null, null, null
             );
 
-            if (cursor != null && cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 String playerName = cursor.getString(cursor.getColumnIndex("username"));
                 int age = cursor.getInt(cursor.getColumnIndex("age"));
                 int level = cursor.getInt(cursor.getColumnIndex("level"));
@@ -217,7 +220,7 @@ public class MainMenuActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     private void showSettingsDialog() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_settings);
@@ -441,11 +444,11 @@ public class MainMenuActivity extends AppCompatActivity {
         tvPlayerName.setText(username);
 
         // 獲取用戶等級和經驗值
-        Cursor cursor = dbHelper.getUserData(username);
-        if (cursor != null && cursor.moveToFirst()) {
+        Cursor cursor = UserDao.getUserDataByUsername(this, username);
+        if (cursor.moveToFirst()) {
             try {
-                int level = cursor.getInt(cursor.getColumnIndex("level"));
-                int experience = cursor.getInt(cursor.getColumnIndex("experience"));
+                @SuppressLint("Range") int level = cursor.getInt(cursor.getColumnIndex("level"));
+                @SuppressLint("Range") int experience = cursor.getInt(cursor.getColumnIndex("experience"));
                 int nextLevelExp = level * 100;  // 下一級所需經驗值
                 int currentLevelExp = (level - 1) * 100;  // 當前等級所需經驗值
                 int progress = ((experience - currentLevelExp) * 100) / (nextLevelExp - currentLevelExp);  // 計算進度百分比

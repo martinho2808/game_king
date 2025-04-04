@@ -26,7 +26,7 @@
                 android:title="@string/language" />
 
             <item
-                android:id="@+id/action_logout"
+                android:id="@+id/action_login"
                 android:icon="@drawable/ic_logout_24dp"
                 android:title="@string/logout" />
         </menu>

@@ -13,8 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import com.example.gema_king.database.dao.UserDao;
+
 public class RegisterActivity extends AppCompatActivity {
-    private DatabaseHelper dbHelper;
     private TextInputLayout usernameLayout;
     private TextInputLayout ageLayout;
     private TextInputLayout passwordLayout;
@@ -42,8 +43,6 @@ public class RegisterActivity extends AppCompatActivity {
         
         setContentView(R.layout.activity_register);
 
-        // 初始化數據庫
-        dbHelper = new DatabaseHelper(this);
         
         // 初始化音效管理器
         soundManager = SoundManager.getInstance(this);
@@ -159,7 +158,7 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             // 檢查用戶名是否已存在
             try {
-                if (dbHelper.isUsernameExists(username)) {
+                if (UserDao.isUsernameExists(this, username)) {
                     setError(usernameLayout, getString(R.string.username_exists));
                     isValid = false;
                 }
@@ -219,7 +218,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (isValid) {
             Log.i(TAG, "Validation passed, proceeding with registration");
             try {
-                dbHelper.insertData(username, age, password, email);
+                UserDao.insertData(this, username, age, password, email);
                 Log.i(TAG, "Registration successful");
                 handleRegistrationSuccess();
             } catch (Exception e) {

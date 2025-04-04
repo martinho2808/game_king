@@ -1,6 +1,8 @@
 package com.example.gema_king.database.dao;
 
 
+import static com.example.gema_king.database.DatabaseHelper.USER_COLUMN_PASSWORD;
+import static com.example.gema_king.database.DatabaseHelper.USER_COLUMN_USERNAME;
 import static com.example.gema_king.database.DatabaseHelper.USER_TABLE_NAME;
 
 import android.content.ContentValues;
@@ -47,5 +49,19 @@ public class LoginDao {
         return userId; // 返回用戶 ID，失敗則返回 -1
     }
 
-
+    public static boolean readData(Context context, String username, String password) {
+        SQLiteDatabase db = getDatabase(context, false);
+        Cursor cursor = null;
+        try {
+            cursor = db.query(USER_TABLE_NAME, new String[]{USER_COLUMN_USERNAME},
+                    USER_COLUMN_USERNAME + " = ? AND " + USER_COLUMN_PASSWORD + " = ?",
+                    new String[]{username, password},
+                    null, null, null);
+            return cursor.getCount() > 0;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 }

@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import com.example.gema_king.database.dao.LoginDao;
+
 public class LoginActivity extends AppCompatActivity {
     private TextInputLayout usernameLayout;
     private TextInputLayout passwordLayout;
@@ -23,7 +25,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private Button cancelButton;
     private TextView registerLink;
-    private DatabaseHelper dbHelper;
+
     private SoundManager soundManager;
     private static final String TAG = "LoginActivity";
 
@@ -37,8 +39,6 @@ public class LoginActivity extends AppCompatActivity {
         
         setContentView(R.layout.activity_login);
 
-        // 初始化數據庫
-        dbHelper = new DatabaseHelper(this);
         
         // 初始化音效管理器
         soundManager = SoundManager.getInstance(this);
@@ -145,7 +145,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkCredentials(String username, String password) {
         // 檢查數據庫中的用戶憑證
-        boolean isValid = dbHelper.readData(username, password);
+        boolean isValid = LoginDao.readData(this, username, password);
         Log.i(TAG, "Database check completed");
 
         if (isValid) {

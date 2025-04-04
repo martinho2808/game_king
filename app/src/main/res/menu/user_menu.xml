@@ -4,13 +4,13 @@
 
     <item
         android:id="@+id/action_leaderboard"
-        android:title="@string/txt_leaderboard"
+        android:title="@string/leaderboard"
         android:icon="@drawable/leaderboard_logo"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_logout"
-        android:title="@string/txt_logout"
+        android:title="@string/logout"
         android:icon="@drawable/logout_logo"
         app:showAsAction="always" />
 </menu>

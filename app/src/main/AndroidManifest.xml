@@ -15,7 +15,7 @@
         <activity
             android:name=".MenuActivity"
             android:exported="false"
-            android:label="@string/title_activity_menu"
+            android:label="ABC"
             android:theme="@style/Theme.Gema_king" />
         <activity
             android:name=".GameActivity"
