@@ -28,9 +28,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.gema_king.model.UserSession;
+import com.example.gema_king.utils.Navigator;
+
+import org.json.JSONObject;
+
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private static final String TAG = "MainActivity";
     private Button loginBtnSignup, loginBtnLogin;
     private TextView mainPageTitle, btnLanguageText;
     private ImageButton btnSettings;
@@ -60,7 +67,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Configuration config = res.getConfiguration();
         config.setLocale(locale);
         res.updateConfiguration(config, res.getDisplayMetrics());
-        
+
+        // 初始化音效管理器
+        soundManager = SoundManager.getInstance(this);
+
+        // 讀取音樂設置
+        boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
+        boolean isSoundEnabled = prefs.getBoolean("isSoundEnabled", true);
+
+        // 設置音樂狀態
+        soundManager.setBGMEnabled(isBGMEnabled);
+        soundManager.setSoundEnabled(isSoundEnabled);
+
+        // 如果背景音樂開啟，則播放
+        if (isBGMEnabled) {
+            soundManager.startBGM();
+        }
+
+
         setContentView(R.layout.activity_main);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -82,21 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.e("MainActivity", "Error setting animated background", e);
         }
 
-        // 初始化音效管理器
-        soundManager = SoundManager.getInstance(this);
-        
-        // 讀取音樂設置
-        boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
-        boolean isSoundEnabled = prefs.getBoolean("isSoundEnabled", true);
-        
-        // 設置音樂狀態
-        soundManager.setBGMEnabled(isBGMEnabled);
-        soundManager.setSoundEnabled(isSoundEnabled);
-        
-        // 如果背景音樂開啟，則播放
-        if (isBGMEnabled) {
-            soundManager.startBGM();
-        }
+
 
         // 初始化視圖
         initializeViews();
@@ -104,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setupClickListeners();
         // 更新UI語言
         updateUILanguage();
+        //checkUserSession();
     }
 
     private void initializeViews() {
@@ -320,5 +331,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         // 由於我們已經在 setupClickListeners() 中使用 lambda 表達式設置了所有點擊事件
         // 這個方法可以保持空白
+    }
+
+    private void checkUserSession(){
+        //Get session
+        UserSession.getInstance();
+        JSONObject userSession = UserSession.getUserSession(this);
+        if (userSession != null) {
+            try {
+                String username = userSession.getString("username");
+                Toast.makeText(this, "Welcome to Game King, " + username, Toast.LENGTH_LONG).show();
+                Navigator.navigateTo(MainActivity.this, MainMenuActivity.class);
+                soundManager = SoundManager.getInstance(this);
+                soundManager.stopBGM();  // 停止當前背景音樂
+                soundManager.switchBGM(R.raw.bgm_menu);  // 切換到主選單的背景音樂
+
+                finish(); // End the current page to prevent the user from returning to the login page
+
+            } catch (Exception e) {
+                UserSession.getInstance().clearUserSession(this);
+                Log.e(TAG, "Error retrieving user session data: " + e.getMessage());
+            }
+        }
+
     }
 }
