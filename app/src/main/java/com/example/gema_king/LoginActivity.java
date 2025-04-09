@@ -2,6 +2,7 @@ package com.example.gema_king;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,6 +13,7 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.gema_king.model.UserSession;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -166,6 +168,7 @@ public class LoginActivity extends AppCompatActivity {
         soundManager.playLoginSuccess();
         
         // 保存登入狀態
+        storeUserSession(username);
         SharedPreferences prefs = getSharedPreferences("GameKing", MODE_PRIVATE);
         prefs.edit()
             .putBoolean("isLoggedIn", true)
@@ -178,5 +181,24 @@ public class LoginActivity extends AppCompatActivity {
         soundManager.stopBGM();  // 停止當前背景音樂
         soundManager.switchBGM(R.raw.bgm_menu);  // 切換到主選單的背景音樂
         finish();
+    }
+
+    private void storeUserSession(String username) {
+        Cursor cursor = dbHelper.getUserData(username);
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                long id = cursor.getInt(cursor.getColumnIndex("id"));
+                int age = cursor.getInt(cursor.getColumnIndex("age"));
+                String email = cursor.getString(cursor.getColumnIndex("email"));
+
+                UserSession.getInstance().saveUserSession(this, id, username, age, email);
+                long id_v2 = UserSession.getUserId(this);
+                Log.i(TAG, String.valueOf(id_v2));
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                cursor.close();
+            }
+        }
     }
 }
