@@ -1,36 +1,18 @@
 package com.example.gema_king;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import com.example.gema_king.model.UserSession;
-import com.example.gema_king.utils.Navigator;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 
-import java.util.Locale;
+import androidx.appcompat.widget.Toolbar;
+
+import com.google.android.material.button.MaterialButton;
 
 public class MainMenuActivity extends MenuActivity {
     private static final String PREF_NAME = "GameKing";
@@ -173,7 +155,7 @@ public class MainMenuActivity extends MenuActivity {
         btnStartGame.setOnClickListener(v -> {
             // TODO: 實現開始遊戲的邏輯
             Log.e("MainMenuActivity", "Start Game");
-            Intent intent = new Intent(this, Game1Activity.class);
+            Intent intent = new Intent(this, Game5Activity.class);
             startActivity(intent);
         });
     }
@@ -450,8 +432,8 @@ public class MainMenuActivity extends MenuActivity {
         Cursor cursor = dbHelper.getUserData(username);
         if (cursor != null && cursor.moveToFirst()) {
             try {
-                int level = cursor.getInt(cursor.getColumnIndex("level"));
-                int experience = cursor.getInt(cursor.getColumnIndex("experience"));
+                @SuppressLint("Range") int level = cursor.getInt(cursor.getColumnIndex("level"));
+                @SuppressLint("Range") int experience = cursor.getInt(cursor.getColumnIndex("experience"));
                 int nextLevelExp = level * 100;  // 下一級所需經驗值
                 int currentLevelExp = (level - 1) * 100;  // 當前等級所需經驗值
                 int progress = ((experience - currentLevelExp) * 100) / (nextLevelExp - currentLevelExp);  // 計算進度百分比
