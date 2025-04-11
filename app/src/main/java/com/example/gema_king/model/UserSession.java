@@ -63,10 +63,10 @@ public class UserSession {
         editor.apply();
     }
 
-    public static long getUserId(Context context) {
+    public static int getUserId(Context context) {
         JSONObject user = getUserSession(context);
         if (user != null) {
-            return user.optLong("id", -1);
+            return (int) user.optLong("id", -1);
         }
         return 0;
     }
