@@ -16,6 +16,9 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.gema_king.model.StatusManager;
+import com.example.gema_king.model.UserSession;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -29,13 +32,20 @@ public class Game1Activity extends MenuActivity {
     private ArrayList<Integer> buttonIds = new ArrayList<>(); // The ID for the save button
     private ArrayList<Integer> selectedColorPattern;
     private ArrayList<View> buttons; // Store color button.
-    private final int totalColors = 5; // Total color count
+    private final int totalColors = 6; // Total color count
     private static final String TAG = "Game1Activity";
+    private final int gameId = 10;
+    private int recordId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game1);
         setupToolbar();
+
+        //Handle status
+        UserSession.getUserId(this);
+        StatusManager.init(this);
+        recordId =  StatusManager.initGameStatus(UserSession.getUserId(this),gameId);
 
         // 初始化视图组件
         gridLayout = findViewById(R.id.gridLayout);
@@ -57,6 +67,7 @@ public class Game1Activity extends MenuActivity {
         }
     }
     private void startGame() {
+        StatusManager.updateGameStatusToProgress(recordId);
         resetGame(); // reset game
         startCountdown(); // start countdown
     }
@@ -186,6 +197,7 @@ public class Game1Activity extends MenuActivity {
                     startButton.setVisibility(View.VISIBLE);
                     boolean result = validColor();
                     if(result) {
+                        StatusManager.updateGameStatusToFinish(recordId, 100,0);
                         Log.d("Result: ", "success");
                     } else {
                         Log.d("Result: ", "fail");

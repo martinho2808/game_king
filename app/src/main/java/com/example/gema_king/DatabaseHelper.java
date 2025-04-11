@@ -1,13 +1,21 @@
 package com.example.gema_king;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.icu.text.SimpleDateFormat;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.example.gema_king.model.GameStatus;
+
+
+import java.util.Date;
+import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 4;
@@ -52,7 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + GAME_STATUS_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + GAME_STATUS_COLUMN_USER_ID + " INTEGER NOT NULL, "
             + GAME_STATUS_COLUMN_GAME_ID + " INTEGER NOT NULL, "
-            + GAME_STATUS_COLUMN_SCORE + " INTEGER DEFAULT 0, "
+            + GAME_STATUS_COLUMN_SCORE + " INTEGER DEFAULT 0as, "
             + GAME_STATUS_COLUMN_PLAY_TIME + " INTEGER DEFAULT 0, "
             + GAME_STATUS_COLUMN_STATUS + " TEXT NOT NULL, "
             + GAME_STATUS_COLUMN_DATE + " DATETIME DEFAULT CURRENT_TIMESTAMP, "
@@ -218,25 +226,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 添加遊戲記錄
-    public long addGameRecord(String username, int gameId, int score, int playTime, String status) {
+    public long addGameRecord(int userId, int gameId, String status) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        
-        // 獲取用戶ID
-        Cursor cursor = getUserData(username);
-        if (cursor != null && cursor.moveToFirst()) {
-            int userId = cursor.getInt(cursor.getColumnIndex(COLUMN_ID));
-            cursor.close();
-            
-            values.put(GAME_STATUS_COLUMN_USER_ID, userId);
-            values.put(GAME_STATUS_COLUMN_GAME_ID, gameId);
-            values.put(GAME_STATUS_COLUMN_SCORE, score);
-            values.put(GAME_STATUS_COLUMN_PLAY_TIME, playTime);
-            values.put(GAME_STATUS_COLUMN_STATUS, status);
-            
-            return db.insert(TABLE_GAME_STATUS, null, values);
-        }
-        return -1;
+
+        values.put(GAME_STATUS_COLUMN_USER_ID, userId);
+        values.put(GAME_STATUS_COLUMN_GAME_ID, gameId);
+        values.put(GAME_STATUS_COLUMN_STATUS, status);
+
+        long id = db.insert(TABLE_GAME_STATUS, null, values);
+        //db.close();
+        return id; // 返回新插入记录的 ID
     }
 
     // 獲取用戶最近的遊戲記錄
@@ -313,5 +313,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return experience;
+    }
+    // Check if a record exists for a specific user and game
+    @SuppressLint("Range")
+    public Integer recordExists(int userId, int gameId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + GAME_STATUS_COLUMN_ID + " FROM " + TABLE_GAME_STATUS +
+                " WHERE " + GAME_STATUS_COLUMN_USER_ID + " = ? AND " +
+                GAME_STATUS_COLUMN_GAME_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId), String.valueOf(gameId)});
+
+        Integer recordId = null;  // default null
+        if (cursor.moveToFirst()) {
+            recordId = cursor.getInt(cursor.getColumnIndex(GAME_STATUS_COLUMN_ID)); // 获取记录 ID
+        }
+        cursor.close();
+        //db.close();
+        return recordId; // Returns the record ID, or null if it does not exist
+    }
+
+    public void updateStatusById(int id, String newStatus, int score, int newPlayTime) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(GAME_STATUS_COLUMN_STATUS, newStatus);
+        String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+        values.put(GAME_STATUS_COLUMN_DATE, currentTime);
+        values.put(GAME_STATUS_COLUMN_SCORE, score);
+        values.put(GAME_STATUS_COLUMN_PLAY_TIME, newPlayTime);
+
+
+
+        db.update(TABLE_GAME_STATUS, values, GAME_STATUS_COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+
+
+
+       // int rowsAffected = db.update(TABLE_GAME_STATUS, values, GAME_STATUS_COLUMN_ID + "=?", new String[]{String.valueOf(id)});
+        //db.close();
+        //return rowsAffected; // Return the number of rows affected
+    }
+    public GameStatus getStatusById(int recordId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT g." + GAME_STATUS_COLUMN_STATUS + ", " +
+                "g." + GAME_STATUS_COLUMN_SCORE + ", " +
+                "g." + GAME_STATUS_COLUMN_PLAY_TIME + ", " +
+                "u." + COLUMN_USERNAME + " FROM " +
+                TABLE_GAME_STATUS + " g " +
+                "JOIN " + TABLE_USERS + " u ON u." + COLUMN_ID + " = g." + GAME_STATUS_COLUMN_USER_ID + " " + // 使用正确的 JOIN 条件
+                "WHERE g." + GAME_STATUS_COLUMN_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(recordId)});
+
+        GameStatus gameStatus = null; // 初始化为 null
+        if (cursor.moveToFirst()) {
+            String status = cursor.getString(cursor.getColumnIndex(GAME_STATUS_COLUMN_STATUS));
+            int score = cursor.getInt(cursor.getColumnIndex(GAME_STATUS_COLUMN_SCORE));
+            int playTime = cursor.getInt(cursor.getColumnIndex(GAME_STATUS_COLUMN_PLAY_TIME));
+            String username = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
+            gameStatus = new GameStatus(username, status, score, playTime); // 创建 GameStatus 对象
+        }
+        cursor.close();
+        //db.close();
+        return gameStatus; // 返回 GameStatus 对象或 null
     }
 }
