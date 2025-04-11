@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -32,7 +33,7 @@ public class Game5Activity extends AppCompatActivity {
     private static final int TARGET_SCORE = 300;
     private static final long GAME_DURATION = 30000;
 
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
 
     private int score = 0;
@@ -162,7 +163,7 @@ public class Game5Activity extends AppCompatActivity {
                     (colors.isEmpty() ? currentTargetColorValue : colors.remove(0));
 
             int size = random.nextInt(120) + 80;
-            int x = 0, y = 0, attempt = 0;
+            int x, y = 0, attempt = 0;
             Rect newRect;
             do {
                 x = random.nextInt(Math.max(1, gameContainer.getWidth() - size));
