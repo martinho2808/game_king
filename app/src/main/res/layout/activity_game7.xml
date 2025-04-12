@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#C0DBF0"
+    tools:context=".Game7Activity">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/purple_500"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            tools:ignore="RtlSymmetry,UseCompoundDrawables">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/game_logo" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_title"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="wrap_content"
+        android:layout_height="350dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:background="#EDE2E2"
+        android:clickable="false"
+        android:focusable="false"
+        android:longClickable="false" />
+
+    <ImageView
+        android:id="@+id/pool"
+        android:layout_width="312dp"
+        android:layout_height="289dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="93dp"
+        android:layout_marginBottom="75dp"
+        app:srcCompat="@drawable/sandpool"
+        android:clickable="false"
+        android:focusable="false"
+        android:longClickable="false" />
+
+
+    <ImageView
+        android:id="@+id/bone"
+        android:layout_width="57dp"
+        android:layout_height="37dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="72dp"
+        android:layout_marginBottom="191dp"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/bone" />
+
+    <ImageView
+        android:id="@+id/happyGirl"
+        android:layout_width="51dp"
+        android:layout_height="55dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="345dp"
+        android:layout_marginEnd="30dp"
+        app:srcCompat="@drawable/happy"
+        android:clickable="false"
+        android:focusable="false"
+        android:longClickable="false" />
+
+    <ImageView
+        android:id="@+id/cryingGirl"
+        android:layout_width="54dp"
+        android:layout_height="93dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="26dp"
+        android:layout_marginBottom="227dp"
+        app:srcCompat="@drawable/scary"
+        android:clickable="false"
+        android:focusable="false"
+        android:longClickable="false" />
+
+    <ImageView
+        android:id="@+id/bucket"
+        android:layout_width="38dp"
+        android:layout_height="44dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="401dp"
+        android:clickable="false"
+        android:focusable="false"
+        android:longClickable="false"
+        app:srcCompat="@drawable/sandbucket" />
+
+    <ImageView
+        android:id="@+id/badDog"
+        android:layout_width="63dp"
+        android:layout_height="68dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="196dp"
+        android:layout_marginBottom="215dp"
+        app:srcCompat="@drawable/baddog"
+        android:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/goodDog"
+        android:layout_width="53dp"
+        android:layout_height="72dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="435dp"
+        android:layout_marginEnd="199dp"
+        app:srcCompat="@drawable/gooddog"
+        tools:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/shovel"
+        android:layout_width="39dp"
+        android:layout_height="42dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="82dp"
+        android:layout_marginTop="370dp"
+        android:focusableInTouchMode="false"
+        app:srcCompat="@drawable/shovel"
+        tools:visibility="invisible" />
+
+
+</RelativeLayout>
