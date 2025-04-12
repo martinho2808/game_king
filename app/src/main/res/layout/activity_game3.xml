@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Game3Activity"
+    android:paddingTop="24dp">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/purple_500"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/game_logo"
+            android:contentDescription="@string/app_name" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_title"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/line1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        tools:ignore="InvalidId,MissingConstraints">
+
+        <TextView
+            android:id="@+id/mine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remain Mines："
+            android:textSize="25dp" />
+
+        <TextView
+            android:id="@+id/minecount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/mine"
+            android:text="00"
+            android:textSize="27dp" />
+    </RelativeLayout>
+
+    <GridLayout
+        android:id="@+id/mines"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/line2"
+        android:layout_below="@+id/line1"
+        android:layout_centerInParent="true"
+        android:columnCount="12"
+        android:rowCount="12"></GridLayout>
+
+    <RelativeLayout
+        android:id="@+id/line2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/open"
+            android:layout_width="94dp"
+            android:layout_height="51dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="30dp"
+            android:background="@drawable/openbtn"
+            android:text="Flip"
+            android:textColor="@color/text_primary"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/open"
+            android:gravity="bottom"
+            android:text="Time："
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/time1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:layout_toRightOf="@+id/time"
+            android:text="00:00:00"
+            android:textSize="20dp" />
+
+        <Button
+            android:id="@+id/flag"
+            android:layout_width="94dp"
+            android:layout_height="51dp"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/time1"
+            android:background="@drawable/flagbtn"
+            android:text="Tag"
+            android:textColor="@color/text_primary"
+            android:textSize="20dp"
+            tools:ignore="InvalidId" />
+    </RelativeLayout>
+</RelativeLayout>
