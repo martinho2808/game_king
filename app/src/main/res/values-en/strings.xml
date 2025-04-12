@@ -111,6 +111,10 @@
     <string name="game_state">Game State</string>
     <string name="state_ready">Ready</string>
 
+
+    <!-- game stage 1 resource -->
+    <string name="game1_start_instructions_g5">🎯 Please remember the order in which the colors appear! \nThen click the color buttons in order!</string>
+
     <!-- game stage 5 resource -->
     <string name="countdown_text">Time Left: %d</string>
     <string name="target_color_text">Target Color: %s</string>

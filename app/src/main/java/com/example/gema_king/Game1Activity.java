@@ -1,5 +1,6 @@
 package com.example.gema_king;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -26,7 +27,11 @@ public class Game1Activity extends MenuActivity {
     private GridLayout gridLayout; // Grid layout, display color.
     private GridLayout gridLayout_answer; // Grid layout, displaying color buttons
     private TextView timerTextView; // Display a text view for the countdown timer.
+    private View startOverlay;
     private Button startButton; // Start game button
+    private View endOverlay;
+    private TextView endMessage;
+    private Button endActionButton;
     private ArrayList<Integer> colorPattern; // Store color mode.
     private ArrayList<Integer> randomColorPattern; // Store random color
     private ArrayList<Integer> buttonIds = new ArrayList<>(); // The ID for the save button
@@ -48,15 +53,22 @@ public class Game1Activity extends MenuActivity {
         recordId =  StatusManager.initGameStatus(UserSession.getUserId(this),gameId);
 
         // 初始化视图组件
+        startOverlay = findViewById(R.id.start_overlay);
         gridLayout = findViewById(R.id.gridLayout);
         gridLayout_answer = findViewById(R.id.gridLayout_answer);
         timerTextView = findViewById(R.id.timerTextView);
-        startButton = findViewById(R.id.startButton);
+        startButton = findViewById(R.id.btn_start_game);
         gridLayout.setVisibility(View.INVISIBLE);
         timerTextView.setVisibility(View.GONE);
 
         // Set the click event for the start game button.
-        startButton.setOnClickListener(v -> startGame());
+        startButton.setOnClickListener(v -> {
+            startOverlay.setVisibility(View.GONE);
+            startGame();
+        });
+        endOverlay = findViewById(R.id.end_overlay);
+        endMessage = findViewById(R.id.end_message);
+        endActionButton = findViewById(R.id.end_action_button);
     }
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -96,15 +108,14 @@ public class Game1Activity extends MenuActivity {
             Log.i(TAG, "Access Game Page" + i);
             final int count = i;
             // Set up the countdown display.
-            handler.postDelayed(() -> timerTextView.setText(String.valueOf(count)), (5 - i) * 1000);
+            handler.postDelayed(() -> timerTextView.setText(String.valueOf(count)), (3 - i) * 1000);
         }
         // To generate a color mode after 6 seconds
         handler.postDelayed(()-> {
             gridLayout.setVisibility(View.VISIBLE);
             timerTextView.setVisibility(View.GONE);
-            startButton.setVisibility(View.GONE);
             generateColorPattern();
-        }, 5000);
+        }, 3000);
     }
 
     private void generateColorPattern() {
@@ -141,7 +152,7 @@ public class Game1Activity extends MenuActivity {
         // To restore the original color and enable a button after displaying all colors
         handler.postDelayed(() -> {
             gridLayout.setVisibility(View.INVISIBLE);
-            startButton.setVisibility(View.VISIBLE);
+            //startButton.setVisibility(View.VISIBLE);
             createColorButtons();
             for (View button : buttons) {
                 button.setBackgroundColor(Color.WHITE);
@@ -153,7 +164,7 @@ public class Game1Activity extends MenuActivity {
 
     @SuppressLint("SetTextI18n")
     private void createColorButtons() {
-        startButton.setVisibility(View.INVISIBLE);
+        //startButton.setVisibility(View.INVISIBLE);
         // get GridLayout
         GridLayout gridLayout = findViewById(R.id.gridLayout);
 
@@ -186,22 +197,33 @@ public class Game1Activity extends MenuActivity {
                 int index = buttonIds.indexOf(v.getId());
                 v.setVisibility(View.INVISIBLE);
                 if (index != -1) {
-                    Toast.makeText(this, "Button " + (index + 1) + " clicked!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this, "Button " + (index + 1) + " clicked!", Toast.LENGTH_SHORT).show();
                 }
                 int color = ((ColorDrawable) v.getBackground()).getColor();
                 selectedColorPattern.add(color);
                 Log.d("ColorChoose: ", String.valueOf(color));
 
                 if(colorPattern.size() == selectedColorPattern.size()){
-                    startButton.setText("Restart");
-                    startButton.setVisibility(View.VISIBLE);
                     boolean result = validColor();
                     if(result) {
                         StatusManager.updateGameStatusToFinish(recordId, 100,0);
+                        endMessage.setText(getString(R.string.end_success_g5));
+                        endActionButton.setText(getString(R.string.next_stage));
+                        endActionButton.setOnClickListener(view -> {
+                            Intent intent = new Intent(Game1Activity.this, Game5Activity.class);
+                            startActivity(intent);
+                            finish();
+                        });
                         Log.d("Result: ", "success");
                     } else {
-                        Log.d("Result: ", "fail");
+                        endMessage.setText(getString(R.string.end_fail));
+                        endActionButton.setText(getString(R.string.retry));
+                        endActionButton.setOnClickListener(view -> {
+                            endOverlay.setVisibility(View.GONE);
+                            startOverlay.setVisibility(View.VISIBLE); // 顯示開始提示
+                        });
                     }
+                    endOverlay.setVisibility(View.VISIBLE);
                 }
             });
 

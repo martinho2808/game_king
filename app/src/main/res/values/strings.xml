@@ -103,6 +103,10 @@
     <string name="level_text">等級: %d</string>
     <string name="experience_text">距離下一級還需要: %d 經驗值</string>
 
+    <!-- game stage 1 resource -->
+    <string name="game1_start_instructions_g5">🎯 請記著顏色顯示順序！\n之後按次序點擊顏色按鈕！</string>
+
+
     <!-- game stage 5 resource -->
     <string name="countdown_text">剩下時間: %d</string>
     <string name="target_color_text">目標顏色: %s</string>
