@@ -63,7 +63,7 @@ public class Game2Activity extends MenuActivity implements PuzzleView.GameEventL
             endMessage.setText(getString(R.string.end_success_g5) + "\n" + timeTakeText + time + secondText + "\n" + scoreText + score);
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(view -> {
-                Intent intent = new Intent(Game2Activity.this, Game5Activity.class);
+                Intent intent = new Intent(Game2Activity.this, Game3Activity.class);
                 startActivity(intent);
                 finish();
             });

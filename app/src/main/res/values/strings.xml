@@ -114,6 +114,15 @@
     <string name="game2_time_take">🎯所用時間： </string>
     <string name="game2_second">🎯秒</string>
     <string name="game2_score">🎯分數: </string>
+
+    <!-- game stage 3 resource -->
+    <string name="game3_start_instructions_g5">🎯 請找出地雷！\n以完成任務！</string>
+    <string name="game3_time">🎯時間: </string>
+    <string name="game3_retry">🎯爆炸了! \n請點擊重試</string>
+    <string name="game3_time_take">🎯所用時間： </string>
+    <string name="game3_second">🎯秒</string>
+    <string name="game3_score">🎯分數: </string>
+
     <!-- game stage 5 resource -->
     <string name="countdown_text">剩下時間: %d</string>
     <string name="target_color_text">目標顏色: %s</string>

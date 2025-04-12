@@ -1,8 +1,11 @@
 package com.example.gema_king;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -48,17 +51,37 @@ public class Game3Activity extends MenuActivity {
     private int Mines = 5;//初始雷数
     private int Opened = 0;//目前已翻开个数
     private int Flagged = 0;//目前被标记个数
+    private View startOverlay;
+    private View endOverlay;
+    private TextView endMessage;
+    private Button endActionButton;
     private Block[][] blocks;
+    private Handler mines;
+    private View minesView;
+
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game3);
+        startOverlay = findViewById(R.id.start_overlay);
         MineField = (GridLayout) findViewById(R.id.mines);
         txtMineCount = (TextView) findViewById(R.id.minecount);
         txtTimer = (TextView) findViewById(R.id.time1);
         openbtn = (Button) findViewById(R.id.open);
         flagbtn = (Button) findViewById(R.id.flag);
         init();
+
+        Button btnStartGame = findViewById(R.id.btn_start_game);
+        btnStartGame.setOnClickListener(v -> {
+            startOverlay.setVisibility(View.GONE);
+            minesView = findViewById(R.id.mines);
+            minesView.setVisibility(View.VISIBLE);
+            init();
+        });
+        endOverlay = findViewById(R.id.end_overlay);
+        endMessage = findViewById(R.id.end_message);
+        endActionButton = findViewById(R.id.end_action_button);
     }
 
     @Override
@@ -179,6 +202,7 @@ public class Game3Activity extends MenuActivity {
     }
 
     //游戏获胜
+    @SuppressLint("SetTextI18n")
     private void winGame() {
         stopTimer();
         isTimerStarted = false;
@@ -194,26 +218,20 @@ public class Game3Activity extends MenuActivity {
             }
         }
         GameRecord(1);//进行记录
-        //弹出获胜对话框
-        new AlertDialog.Builder(this).setTitle("Win")
-                .setMessage("You win!\nTime：" + time)
-                .setNegativeButton("Menu", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Game3Activity.this, MainMenuActivity.class);
-                        startActivity(intent);
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("Next game", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Game3Activity.this, Game4Activity.class);
-                        startActivity(intent);
-                        dialog.dismiss();
-                    }
-                })
-                .create().show();
+        runOnUiThread(() -> {
+            //startOverlay.setVisibility(View.VISIBLE);
+            String secondText = getString(R.string.game3_second);
+            String timeTakeText = getString(R.string.game3_time_take);
+            String scoreText = getString(R.string.game3_score);
+            endMessage.setText(getString(R.string.end_success_g5) + "\n" + timeTakeText + time);
+            endActionButton.setText(getString(R.string.next_stage));
+            endActionButton.setOnClickListener(view -> {
+                Intent intent = new Intent(Game3Activity.this, Game4Activity.class);
+                startActivity(intent);
+                finish();
+            });
+            endOverlay.setVisibility(View.VISIBLE);
+        });
     }
 
     //游戏失败
@@ -236,24 +254,16 @@ public class Game3Activity extends MenuActivity {
             }
         }
         GameRecord(0);//进行记录
-        //弹出失败对话框
-        new AlertDialog.Builder(this).setTitle("Lose")
-                .setMessage("You lose!\nTime：" + time)
-                .setNegativeButton("Menu", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Game3Activity.this, MainMenuActivity.class);
-                        startActivity(intent);
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        init();
-                    }
-                })
-                .create().show();
+        runOnUiThread(() -> {
+            //startOverlay.setVisibility(View.VISIBLE);
+            endMessage.setText(getString(R.string.game3_retry));
+            endActionButton.setText(getString(R.string.retry));
+            endActionButton.setOnClickListener(v -> {
+                endOverlay.setVisibility(View.GONE);
+                startOverlay.setVisibility(View.VISIBLE); // 顯示開始提示
+            });
+            endOverlay.setVisibility(View.VISIBLE);
+        });
     }
 
     //游戏结果存档
