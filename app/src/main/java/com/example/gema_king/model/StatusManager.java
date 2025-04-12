@@ -47,7 +47,12 @@ public class StatusManager {
 
     public static void updateGameStatusToFinish(int recordId, int score, int playTime){
         GameStatus gameStatus = dbHelper.getStatusById(recordId);
-        int updatePlayTime = Math.min(gameStatus.getPlayTime(), playTime);
+        int updatePlayTime;
+        if(gameStatus.getPlayTime() != 0){
+            updatePlayTime = Math.min(gameStatus.getPlayTime(), playTime);
+        } else {
+            updatePlayTime = playTime;
+        }
         int updateScore = Math.max(gameStatus.getScore(), score);
         dbHelper.updateStatusById(recordId, game_finished, updateScore, updatePlayTime);
 
