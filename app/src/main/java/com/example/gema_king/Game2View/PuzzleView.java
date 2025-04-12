@@ -87,6 +87,7 @@ public class PuzzleView extends View {
         UserSession.getUserId(context);
         StatusManager.init(context);
         recordId = StatusManager.initGameStatus(UserSession.getUserId(context), gameId);
+        StatusManager.updateGamePlayed(UserSession.getUserId(context));
     }
 
     // Initialize the puzzle by dividing the image into pieces
