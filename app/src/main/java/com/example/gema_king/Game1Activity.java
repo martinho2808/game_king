@@ -51,7 +51,7 @@ public class Game1Activity extends MenuActivity {
         UserSession.getUserId(this);
         StatusManager.init(this);
         recordId =  StatusManager.initGameStatus(UserSession.getUserId(this),gameId);
-
+        StatusManager.updateGamePlayed(UserSession.getUserId(this));
         // 初始化视图组件
         startOverlay = findViewById(R.id.start_overlay);
         gridLayout = findViewById(R.id.gridLayout);

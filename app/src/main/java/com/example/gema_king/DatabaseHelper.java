@@ -15,6 +15,7 @@ import com.example.gema_king.model.GameStatus;
 
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -374,4 +375,53 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //db.close();
         return gameStatus; // 返回 GameStatus 对象或 null
     }
+
+
+    public void updateGamePlayedByUserId(int UserId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String updateQuery = "UPDATE " + TABLE_USERS +
+                " SET " + COLUMN_GAMES_PLAYED + " = " + COLUMN_GAMES_PLAYED + " + 1" +
+                " WHERE " + COLUMN_ID + " = ?";
+        db.execSQL(updateQuery, new Object[]{UserId});
+        db.close();
+
+    }
+
+    public HashMap<String, Object> getUserGameStatsSimple(int userId) {
+        HashMap<String, Object> result = new HashMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String query = "SELECT " +
+                "user.username, " +
+                "user.games_played, " +
+                "user.experience, " +
+                "user.level, " +
+                "user.age, " +
+                "COALESCE(SUM(gs.play_time), 0) AS total_play_time, " +
+                "COALESCE(SUM(gs.score), 0) AS total_score, " +
+                "SUM(CASE WHEN gs.status = 'Finished' THEN 1 ELSE 0 END) as total_finished_game, " +
+                "SUM(CASE WHEN gs.status IN ('In Progress', 'Stopped', 'Not Started') THEN 1 ELSE 0 END) as total_progress_game " +
+                "FROM users user " +
+                "LEFT JOIN game_status gs ON user.id = gs.user_id " +
+                "WHERE user.id = ? " +
+                "GROUP BY user.username, user.games_played";
+
+        try (Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)})) {
+            if (cursor.moveToFirst()) {
+                result.put("username", cursor.getString(0));
+                result.put("games_played", cursor.getInt(1));
+                result.put("experience", cursor.getInt(2));
+                result.put("level", cursor.getInt(3));
+                result.put("age", cursor.getInt(4));
+                result.put("total_play_time", cursor.getInt(5));
+                result.put("total_score", cursor.getInt(6));
+                result.put("total_finished_game", cursor.getInt(7));
+                result.put("total_progress_game", cursor.getInt(8));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
+

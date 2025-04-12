@@ -94,10 +94,16 @@
     <!-- 遊戲進度相關 -->
     <string name="total_play_time_format">%d 小時 %d 分鐘</string>
     <string name="total_play_time_minutes">%d 分鐘</string>
+    <string name="total_play_time_seconds">%d 秒</string>
     <string name="total_play_time">遊戲時間</string>
     <string name="highest_score">最高分數</string>
     <string name="game_state">遊戲狀態</string>
     <string name="state_ready">準備就緒</string>
+    <string name="total_score">總分數</string>
+    <string name="not_start">未開始</string>
+    <string name="in_progress">進行中</string>
+    <string name="progress_finish">已完成</string>
+
 
     <!-- 新增等級和經驗值相關的文字資源 -->
     <string name="level_text">等級: %d</string>

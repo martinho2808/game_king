@@ -12,7 +12,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.gema_king.model.UserSession;
 import com.google.android.material.button.MaterialButton;
+
+import java.util.HashMap;
 
 public class MainMenuActivity extends MenuActivity {
     private static final String PREF_NAME = "GameKing";
@@ -81,31 +84,26 @@ public class MainMenuActivity extends MenuActivity {
                 return;
             }
 
-            Cursor cursor = dbHelper.getReadableDatabase().query(
-                "users",
-                new String[]{"username", "age", "level", "games_played", "total_play_time", "highest_score"},
-                "username = ?",
-                new String[]{username},
-                null, null, null
-            );
+            HashMap<String, Object> stats = dbHelper.getUserGameStatsSimple(UserSession.getUserId(this));
+            if (stats != null && !stats.isEmpty()) {
+                String playerName = (String) stats.get("username");
+                int age = (int) stats.get("age");
+                int level = (int) stats.get("level");
+                int gamesPlayed = (int) stats.get("games_played");
+                int totalPlayTime = (int) stats.get("total_play_time");
+                int highestScore = (int) stats.get("total_score");
+                int total_finished_game = (int) stats.get("total_finished_game");
+                int total_progress_game = (int) stats.get("total_progress_game");
 
-            if (cursor != null && cursor.moveToFirst()) {
-                String playerName = cursor.getString(cursor.getColumnIndex("username"));
-                int age = cursor.getInt(cursor.getColumnIndex("age"));
-                int level = cursor.getInt(cursor.getColumnIndex("level"));
-                int gamesPlayed = cursor.getInt(cursor.getColumnIndex("games_played"));
-                int totalPlayTime = cursor.getInt(cursor.getColumnIndex("total_play_time"));
-                int highestScore = cursor.getInt(cursor.getColumnIndex("highest_score"));
-
-                Log.d("MainMenuActivity", "Data loaded: " + 
-                    "playerName=" + playerName + 
-                    ", age=" + age + 
-                    ", level=" + level + 
-                    ", gamesPlayed=" + gamesPlayed + 
-                    ", totalPlayTime=" + totalPlayTime + 
+                Log.d("MainMenuActivity", "Data loaded: " +
+                    "playerName=" + playerName +
+                    ", age=" + age +
+                    ", level=" + level +
+                    ", gamesPlayed=" + gamesPlayed +
+                    ", totalPlayTime=" + totalPlayTime +
                     ", highestScore=" + highestScore);
-
                 // 更新玩家基本信息
+
                 tvPlayerName.setText(playerName);
                 tvPlayerAge.setText(getString(R.string.age_format, age));
                 tvLevel.setText("(Lv. " + level + ")");
@@ -114,7 +112,13 @@ public class MainMenuActivity extends MenuActivity {
                 // 更新遊戲狀態顯示
                 TextView tvGameState = findViewById(R.id.tv_game_state);
                 if (tvGameState != null) {
-                    tvGameState.setText(R.string.state_ready);
+                    if(total_finished_game + total_progress_game == 0) {
+                        tvGameState.setText(R.string.not_start);
+                    } else if (total_finished_game < 10) {
+                        tvGameState.setText(R.string.in_progress);
+                    } else {
+                        tvGameState.setText(R.string.progress_finish);
+                    }
                 }
 
                 // 更新遊戲進度詳細信息
@@ -136,7 +140,7 @@ public class MainMenuActivity extends MenuActivity {
                     tvHighestScore.setText(String.valueOf(highestScore));
                 }
 
-                cursor.close();
+
             } else {
                 Log.e("MainMenuActivity", "No data found for username: " + username);
                 Toast.makeText(this, "無法載入用戶數據", Toast.LENGTH_SHORT).show();

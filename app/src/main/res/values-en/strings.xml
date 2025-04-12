@@ -108,8 +108,13 @@
     <string name="error_login_failed">Invalid username or password</string>
     <string name="total_play_time_format">%d h %d m</string>
     <string name="total_play_time_minutes">%d m</string>
+    <string name="total_play_time_seconds">%d s</string>
     <string name="game_state">Game State</string>
     <string name="state_ready">Ready</string>
+    <string name="total_score">Total Score</string>
+    <string name="not_start">Not Started</string>
+    <string name="in_progress">In Progress</string>
+    <string name="progress_finish">Completed</string>
 
 
     <!-- game stage 1 resource -->
