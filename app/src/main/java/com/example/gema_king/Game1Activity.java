@@ -210,7 +210,7 @@ public class Game1Activity extends MenuActivity {
                         endMessage.setText(getString(R.string.end_success_g5));
                         endActionButton.setText(getString(R.string.next_stage));
                         endActionButton.setOnClickListener(view -> {
-                            Intent intent = new Intent(Game1Activity.this, Game5Activity.class);
+                            Intent intent = new Intent(Game1Activity.this, Game2Activity.class);
                             startActivity(intent);
                             finish();
                         });
