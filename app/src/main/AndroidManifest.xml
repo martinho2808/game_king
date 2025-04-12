@@ -26,6 +26,9 @@
             android:name=".Game3Activity"
             android:exported="false" />
         <activity
+            android:name=".Game4Activity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="false" />
         <activity

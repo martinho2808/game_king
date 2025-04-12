@@ -208,7 +208,7 @@ public class Game3Activity extends MenuActivity {
                 .setPositiveButton("Next game", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Game3Activity.this, Game1Activity.class);
+                        Intent intent = new Intent(Game3Activity.this, Game4Activity.class);
                         startActivity(intent);
                         dialog.dismiss();
                     }
