@@ -106,7 +106,14 @@
     <!-- game stage 1 resource -->
     <string name="game1_start_instructions_g5">🎯 請記著顏色顯示順序！\n之後按次序點擊顏色按鈕！</string>
 
-
+    <!-- game stage 2 resource -->
+    <string name="game2_start_instructions_g5">🎯 請移動圖片碎片！\n以完成任務！</string>
+    <string name="game2_swap">🎯移動次數: </string>
+    <string name="game2_time">🎯時間: </string>
+    <string name="game2_retry">🎯時間到了，遊戲結束！請點擊重試</string>
+    <string name="game2_time_take">🎯所用時間： </string>
+    <string name="game2_second">🎯秒</string>
+    <string name="game2_score">🎯分數: </string>
     <!-- game stage 5 resource -->
     <string name="countdown_text">剩下時間: %d</string>
     <string name="target_color_text">目標顏色: %s</string>

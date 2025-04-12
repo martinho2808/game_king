@@ -348,7 +348,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
        // int rowsAffected = db.update(TABLE_GAME_STATUS, values, GAME_STATUS_COLUMN_ID + "=?", new String[]{String.valueOf(id)});
-        //db.close();
+        db.close();
         //return rowsAffected; // Return the number of rows affected
     }
     public GameStatus getStatusById(int recordId) {

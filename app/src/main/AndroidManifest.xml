@@ -23,6 +23,9 @@
             android:name=".Game1Activity"
             android:exported="false" />
         <activity
+            android:name=".Game2Activity"
+            android:exported="false" />
+        <activity
             android:name=".Game5Activity"
             android:exported="false"
             android:screenOrientation="portrait"
