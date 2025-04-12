@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -70,6 +71,7 @@ public class Game3Activity extends MenuActivity {
         txtTimer = (TextView) findViewById(R.id.time1);
         openbtn = (Button) findViewById(R.id.open);
         flagbtn = (Button) findViewById(R.id.flag);
+        setupToolbar();
         init();
 
         Button btnStartGame = findViewById(R.id.btn_start_game);
@@ -479,5 +481,13 @@ public class Game3Activity extends MenuActivity {
             return true;
         }
         return false;
+    }
+
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
     }
 }
