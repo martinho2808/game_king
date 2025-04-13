@@ -24,9 +24,11 @@ import android.view.WindowManager;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import android.view.MenuItem;
 
 import com.example.gema_king.model.UserSession;
 import com.example.gema_king.utils.Navigator;
@@ -95,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // 設置動畫背景
         try {
-            LinearLayout mainLayout = findViewById(R.id.main);
+            ConstraintLayout mainLayout = findViewById(R.id.main);
             AnimationDrawable animationDrawable = (AnimationDrawable) mainLayout.getBackground();
             if (animationDrawable != null) {
                 animationDrawable.setEnterFadeDuration(2000);
@@ -327,6 +329,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seekBar.getThumb().setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_leaderboard) {
+            Log.d("Toolbar", "📌 點擊了排行榜選項，準備跳轉 LeaderboardActivity");
+            startActivity(new Intent(this, LeaderboardActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
     @Override
     public void onClick(View v) {
         // 由於我們已經在 setupClickListeners() 中使用 lambda 表達式設置了所有點擊事件

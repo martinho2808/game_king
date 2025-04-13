@@ -16,8 +16,12 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.gema_king.model.StatusManager;
+import com.example.gema_king.model.UserSession;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +36,7 @@ public class Game5Activity extends AppCompatActivity {
 
     private static final int TARGET_SCORE = 300;
     private static final long GAME_DURATION = 30000;
+    private static final int GAME_ID = 50;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
@@ -51,13 +56,15 @@ public class Game5Activity extends AppCompatActivity {
             Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.MAGENTA, Color.BLACK
     };
     private int currentTargetColorValue;
+    private int recordId;
+    private long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game5);
 
-        Log.d("GameStage5", "✅ GameStage5 start！");
+        StatusManager.init(this);
 
         startOverlay = findViewById(R.id.start_overlay);
         gameContainer = findViewById(R.id.game_container);
@@ -72,6 +79,7 @@ public class Game5Activity extends AppCompatActivity {
             startOverlay.setVisibility(View.GONE);
             gameContainer.post(this::startGame);
         });
+
         endOverlay = findViewById(R.id.end_overlay);
         endMessage = findViewById(R.id.end_message);
         endActionButton = findViewById(R.id.end_action_button);
@@ -87,7 +95,13 @@ public class Game5Activity extends AppCompatActivity {
         updateScore();
         updateCombo(0);
 
-        gameTimer = this::endGame;
+        long userId = UserSession.getUserId(this);
+        recordId = StatusManager.initGameStatus((int) userId, GAME_ID);
+        StatusManager.updateGameStatusToProgress(recordId);
+
+        startTime = System.currentTimeMillis(); // 記錄開始時間
+
+        gameTimer = () -> endGame();
         handler.postDelayed(gameTimer, GAME_DURATION);
 
         setNewTargetColor();
@@ -100,7 +114,6 @@ public class Game5Activity extends AppCompatActivity {
                 timeLeft--;
                 updateCountdown(timeLeft);
                 if (timeLeft > 0) handler.postDelayed(this, 1000);
-                else endGame();
             }
         }, 1000);
     }
@@ -120,21 +133,19 @@ public class Game5Activity extends AppCompatActivity {
         if (combo > 0) {
             comboText.setText(getString(R.string.combo_text, combo));
             comboText.setVisibility(View.VISIBLE);
-
             comboEffect.setText("+1");
             comboEffect.setVisibility(View.VISIBLE);
+
             Animation fade = new AlphaAnimation(1.0f, 0.0f);
             fade.setDuration(800);
             comboEffect.startAnimation(fade);
             handler.postDelayed(() -> comboEffect.setVisibility(View.INVISIBLE), 800);
-
         } else {
             comboText.setVisibility(View.INVISIBLE);
             comboEffect.setVisibility(View.INVISIBLE);
         }
     }
 
-    @SuppressLint({"SetTextI18n", "StringFormatMatches"})
     private void setNewTargetColor() {
         int index = random.nextInt(colorNames.length);
         String currentTargetColorName = colorNames[index];
@@ -142,7 +153,6 @@ public class Game5Activity extends AppCompatActivity {
         targetColorText.setText(getString(R.string.target_color_text, currentTargetColorName));
     }
 
-    @SuppressLint("SetTextI18n")
     private void generateShape() {
         if (!isGameRunning) return;
 
@@ -199,11 +209,12 @@ public class Game5Activity extends AppCompatActivity {
                     updateCombo(0);
                     Toast.makeText(this, "Wrong Color!", Toast.LENGTH_SHORT).show();
                 }
-
+                score = Math.min(score, TARGET_SCORE);
                 updateScore();
 
-                if (score >= TARGET_SCORE || timeLeft <= 0) endGame();
-                else {
+                if (score >= TARGET_SCORE) {
+                    endGame(); // 達到分數立即結束
+                } else {
                     setNewTargetColor();
                     generateShape();
                 }
@@ -233,6 +244,18 @@ public class Game5Activity extends AppCompatActivity {
         handler.removeCallbacks(gameTimer);
         gameContainer.removeAllViews();
 
+        int playTime = (int) ((System.currentTimeMillis() - startTime) / 1000); // 秒數
+
+        if (recordId != -1) {
+            StatusManager.updateGameStatusToFinish(recordId, score, playTime);
+            long userId = UserSession.getUserId(this);
+            Log.d("Game5Activity", "✅ 分數儲存成功 - userId: " + userId + ", score: " + score + ", playTime: " + playTime + ", gameId: " + GAME_ID);
+            Log.d("Game5", "✅ 更新紀錄：score = " + score + ", playTime = " + playTime + ", recordId = " + recordId);
+            Log.d("Game5Activity", "🕒 計算時間 playTime=" + playTime + ", startTime=" + startTime + ", now=" + System.currentTimeMillis());
+        } else {
+            Log.e("Game5Activity", "❌ recordId 無效，未儲存遊戲紀錄");
+        }
+
         if (score >= TARGET_SCORE) {
             endMessage.setText(getString(R.string.end_success_g5));
             endActionButton.setText(getString(R.string.next_stage));
@@ -246,11 +269,10 @@ public class Game5Activity extends AppCompatActivity {
             endActionButton.setText(getString(R.string.retry));
             endActionButton.setOnClickListener(v -> {
                 endOverlay.setVisibility(View.GONE);
-                startOverlay.setVisibility(View.VISIBLE); // 顯示開始提示
+                startOverlay.setVisibility(View.VISIBLE);
             });
         }
 
         endOverlay.setVisibility(View.VISIBLE);
     }
-
 }

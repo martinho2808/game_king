@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "gameking.db";
     private static final String TABLE_USERS = "users";
 
@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + GAME_STATUS_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + GAME_STATUS_COLUMN_USER_ID + " INTEGER NOT NULL, "
             + GAME_STATUS_COLUMN_GAME_ID + " INTEGER NOT NULL, "
-            + GAME_STATUS_COLUMN_SCORE + " INTEGER DEFAULT 0as, "
+            + GAME_STATUS_COLUMN_SCORE + " INTEGER DEFAULT 0, "
             + GAME_STATUS_COLUMN_PLAY_TIME + " INTEGER DEFAULT 0, "
             + GAME_STATUS_COLUMN_STATUS + " TEXT NOT NULL, "
             + GAME_STATUS_COLUMN_DATE + " DATETIME DEFAULT CURRENT_TIMESTAMP, "
@@ -80,6 +80,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.i(TAG, "Database tables created");
     }
 
+    @SuppressLint("Range")
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // 保存舊的數據
@@ -199,9 +200,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 先獲取當前數據
         Cursor cursor = getUserData(username);
         if (cursor != null && cursor.moveToFirst()) {
-            int currentGamesPlayed = cursor.getInt(cursor.getColumnIndex(COLUMN_GAMES_PLAYED));
-            int currentLevel = cursor.getInt(cursor.getColumnIndex(COLUMN_LEVEL));
-            int currentExperience = cursor.getInt(cursor.getColumnIndex(COLUMN_EXPERIENCE));
+            @SuppressLint("Range") int currentGamesPlayed = cursor.getInt(cursor.getColumnIndex(COLUMN_GAMES_PLAYED));
+            @SuppressLint("Range") int currentLevel = cursor.getInt(cursor.getColumnIndex(COLUMN_LEVEL));
+            @SuppressLint("Range") int currentExperience = cursor.getInt(cursor.getColumnIndex(COLUMN_EXPERIENCE));
             
             // 更新數據
             values.put(COLUMN_GAMES_PLAYED, currentGamesPlayed + 1);
@@ -349,7 +350,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
        // int rowsAffected = db.update(TABLE_GAME_STATUS, values, GAME_STATUS_COLUMN_ID + "=?", new String[]{String.valueOf(id)});
-        db.close();
+        //db.close();
         //return rowsAffected; // Return the number of rows affected
     }
     public GameStatus getStatusById(int recordId) {
@@ -365,18 +366,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         GameStatus gameStatus = null; // 初始化为 null
         if (cursor.moveToFirst()) {
-            String status = cursor.getString(cursor.getColumnIndex(GAME_STATUS_COLUMN_STATUS));
-            int score = cursor.getInt(cursor.getColumnIndex(GAME_STATUS_COLUMN_SCORE));
-            int playTime = cursor.getInt(cursor.getColumnIndex(GAME_STATUS_COLUMN_PLAY_TIME));
-            String username = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
+            @SuppressLint("Range") String status = cursor.getString(cursor.getColumnIndex(GAME_STATUS_COLUMN_STATUS));
+            @SuppressLint("Range") int score = cursor.getInt(cursor.getColumnIndex(GAME_STATUS_COLUMN_SCORE));
+            @SuppressLint("Range") int playTime = cursor.getInt(cursor.getColumnIndex(GAME_STATUS_COLUMN_PLAY_TIME));
+            @SuppressLint("Range") String username = cursor.getString(cursor.getColumnIndex(COLUMN_USERNAME));
             gameStatus = new GameStatus(username, status, score, playTime); // 创建 GameStatus 对象
         }
         cursor.close();
         //db.close();
         return gameStatus; // 返回 GameStatus 对象或 null
     }
-
-
     public void updateGamePlayedByUserId(int UserId) {
         SQLiteDatabase db = this.getWritableDatabase();
         String updateQuery = "UPDATE " + TABLE_USERS +
