@@ -99,9 +99,9 @@ public class Game5Activity extends AppCompatActivity {
         recordId = StatusManager.initGameStatus((int) userId, GAME_ID);
         StatusManager.updateGameStatusToProgress(recordId);
 
-        startTime = System.currentTimeMillis(); // 記錄開始時間
+        startTime = System.currentTimeMillis();
 
-        gameTimer = () -> endGame();
+        gameTimer = () -> endGame(score >= TARGET_SCORE);
         handler.postDelayed(gameTimer, GAME_DURATION);
 
         setNewTargetColor();
@@ -213,7 +213,7 @@ public class Game5Activity extends AppCompatActivity {
                 updateScore();
 
                 if (score >= TARGET_SCORE) {
-                    endGame(); // 達到分數立即結束
+                    endGame(true);
                 } else {
                     setNewTargetColor();
                     generateShape();
@@ -239,24 +239,22 @@ public class Game5Activity extends AppCompatActivity {
         return drawable;
     }
 
-    private void endGame() {
+    private void endGame(boolean isPassed) {
         isGameRunning = false;
         handler.removeCallbacks(gameTimer);
         gameContainer.removeAllViews();
 
-        int playTime = (int) ((System.currentTimeMillis() - startTime) / 1000); // 秒數
+        int playTime = (int) ((System.currentTimeMillis() - startTime) / 1000);
 
-        if (recordId != -1) {
+        if (isPassed && recordId != -1) {
             StatusManager.updateGameStatusToFinish(recordId, score, playTime);
             long userId = UserSession.getUserId(this);
             Log.d("Game5Activity", "✅ 分數儲存成功 - userId: " + userId + ", score: " + score + ", playTime: " + playTime + ", gameId: " + GAME_ID);
-            Log.d("Game5", "✅ 更新紀錄：score = " + score + ", playTime = " + playTime + ", recordId = " + recordId);
-            Log.d("Game5Activity", "🕒 計算時間 playTime=" + playTime + ", startTime=" + startTime + ", now=" + System.currentTimeMillis());
         } else {
-            Log.e("Game5Activity", "❌ recordId 無效，未儲存遊戲紀錄");
+            Log.d("Game5Activity", "❌ 未通關，未儲存分數。score=" + score + ", playTime=" + playTime);
         }
 
-        if (score >= TARGET_SCORE) {
+        if (isPassed) {
             endMessage.setText(getString(R.string.end_success_g5));
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(v -> {

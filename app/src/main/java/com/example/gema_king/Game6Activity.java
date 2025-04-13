@@ -60,7 +60,7 @@ public class Game6Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game6);
-
+        StatusManager.init(this);
         gameLayer = findViewById(R.id.game_layer);
         player = findViewById(R.id.player);
         healthText = findViewById(R.id.health_text);
@@ -258,13 +258,13 @@ public class Game6Activity extends AppCompatActivity {
         int playTime = (int) (elapsedMillis / 1000);
         int finalScore = Math.min(score, 300);
 
-        // 儲存紀錄
-        if (recordId != -1) {
+        // ✅ 成功才儲存分數與時間
+        if (survivedTime && recordId != -1) {
             StatusManager.updateGameStatusToFinish(recordId, finalScore, playTime);
             long userId = UserSession.getUserId(this);
             Log.d("Game6Activity", "✅ 分數儲存成功 - userId: " + userId + ", score: " + finalScore + ", playTime: " + playTime + ", gameId: " + GAME_ID);
         } else {
-            Log.e("Game6Activity", "❌ recordId 無效，未儲存遊戲紀錄");
+            Log.d("Game6Activity", "未通關，分數不儲存。score=" + finalScore + ", time=" + playTime);
         }
 
         // 顯示結束畫面
@@ -273,7 +273,6 @@ public class Game6Activity extends AppCompatActivity {
                     getString(R.string.score_text, finalScore));
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(v -> {
-                // 跳 Game7
                 // startActivity(new Intent(Game6Activity.this, Game7Activity.class));
                 // finish();
             });
@@ -288,6 +287,5 @@ public class Game6Activity extends AppCompatActivity {
         }
 
         endOverlay.setVisibility(View.VISIBLE);
-
     }
 }

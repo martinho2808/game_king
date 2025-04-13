@@ -163,7 +163,7 @@ public class MainMenuActivity extends MenuActivity {
         btnStartGame.setOnClickListener(v -> {
             // TODO: 實現開始遊戲的邏輯
             Log.e("MainMenuActivity", "Start Game");
-            Intent intent = new Intent(this, Game1Activity.class);
+            Intent intent = new Intent(this, Game5Activity.class);
             startActivity(intent);
         });
     }
