@@ -176,7 +176,7 @@ public class LoginActivity extends AppCompatActivity {
             .apply();
 
         // 切換到主選單並切換背景音樂
-        Intent intent = new Intent(this, MainMenuActivity.class);
+        Intent intent = new Intent(this, Game1Activity.class);
         startActivity(intent);
         soundManager.stopBGM();  // 停止當前背景音樂
         soundManager.switchBGM(R.raw.bgm_menu);  // 切換到主選單的背景音樂

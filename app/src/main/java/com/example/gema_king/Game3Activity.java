@@ -228,7 +228,7 @@ public class Game3Activity extends MenuActivity {
             endMessage.setText(getString(R.string.end_success_g5) + "\n" + timeTakeText + time);
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(view -> {
-                Intent intent = new Intent(Game3Activity.this, Game4Activity.class);
+                Intent intent = new Intent(Game3Activity.this, Game5Activity.class);
                 startActivity(intent);
                 finish();
             });
