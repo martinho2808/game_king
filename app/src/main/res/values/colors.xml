@@ -56,4 +56,11 @@
 
     <!-- 新增禁用狀態的顏色定義 -->
     <color name="disabled_color">#808080</color>
+
+    <!-- 對話框文字顏色 -->
+    <color name="dialog_text">@android:color/white</color>
+
+    <!-- 對話框按鈕顏色 -->
+    <color name="dialog_confirm">#4CAF50</color>
+    <color name="dialog_cancel">#F44336</color>
 </resources>

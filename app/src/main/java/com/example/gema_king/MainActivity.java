@@ -8,6 +8,8 @@ import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -20,6 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Dialog;
 import android.view.WindowManager;
+import android.view.Gravity;
+import android.graphics.Typeface;
+import android.util.TypedValue;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
@@ -58,34 +63,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getWindow().setStatusBarColor(getResources().getColor(android.R.color.transparent));
         getWindow().setNavigationBarColor(getResources().getColor(android.R.color.transparent));
         
-        // 讀取語言設置
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        isEnglish = prefs.getBoolean(KEY_LANGUAGE, true);  // 預設為英文
+        // 初始化音效管理器
+        soundManager = SoundManager.getInstance(this);
         
-        // 設置語言
+        // 讀取設置
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        isEnglish = prefs.getBoolean(KEY_LANGUAGE, true);
+        
+        // 立即應用語言設置
         Locale locale = isEnglish ? Locale.ENGLISH : Locale.TRADITIONAL_CHINESE;
         Locale.setDefault(locale);
         Resources res = getResources();
         Configuration config = res.getConfiguration();
         config.setLocale(locale);
         res.updateConfiguration(config, res.getDisplayMetrics());
-
-        // 初始化音效管理器
-        soundManager = SoundManager.getInstance(this);
-
-        // 讀取音樂設置
+        
         boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
-        boolean isSoundEnabled = prefs.getBoolean("isSoundEnabled", true);
-
+        
         // 設置音樂狀態
         soundManager.setBGMEnabled(isBGMEnabled);
-        soundManager.setSoundEnabled(isSoundEnabled);
-
-        // 如果背景音樂開啟，則播放
-        if (isBGMEnabled) {
-            soundManager.startBGM();
-        }
-
+        
+        // 延遲啟動音樂，確保活動完全創建
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (isBGMEnabled && !isFinishing()) {
+                soundManager.switchBGM(R.raw.bgm_main);
+                soundManager.startBGM();
+            }
+        }, 300);
 
         setContentView(R.layout.activity_main);
 
@@ -108,15 +112,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Log.e("MainActivity", "Error setting animated background", e);
         }
 
-
-
         // 初始化視圖
         initializeViews();
         // 設置點擊事件
         setupClickListeners();
         // 更新UI語言
         updateUILanguage();
-        //checkUserSession();
+        checkUserSession();
     }
 
     private void initializeViews() {
@@ -183,7 +185,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         if (soundManager == null) {
             soundManager = SoundManager.getInstance(this);
-            soundManager.startBGM();
+        }
+        
+        // 檢查並確保背景音樂正確播放
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
+        
+        if (isBGMEnabled) {
+            // 如果當前沒有播放主頁面的背景音樂，則切換並播放
+            if (!soundManager.isBGMPlaying() || soundManager.getCurrentBGM() != R.raw.bgm_main) {
+                soundManager.switchBGM(R.raw.bgm_main);
+                soundManager.startBGM();
+            }
         }
     }
 
@@ -253,11 +266,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SeekBar soundSeekBar = dialog.findViewById(R.id.seekbar_game_sound);
         Button okButton = dialog.findViewById(R.id.btn_ok);
 
-        // 設置開關的初始狀態
+        // 從 SoundManager 讀取當前設置
         bgmSwitch.setChecked(soundManager.isBGMEnabled());
         soundSwitch.setChecked(soundManager.isSoundEnabled());
-
-        // 設置音量條的初始值和狀態
         bgmSeekBar.setProgress((int)(soundManager.getBGMVolume() * 100));
         soundSeekBar.setProgress((int)(soundManager.getSFXVolume() * 100));
         bgmSeekBar.setEnabled(soundManager.isBGMEnabled());
@@ -347,26 +358,92 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 這個方法可以保持空白
     }
 
-    private void checkUserSession(){
-        //Get session
+    private void checkUserSession() {
         UserSession.getInstance();
         JSONObject userSession = UserSession.getUserSession(this);
         if (userSession != null) {
             try {
                 String username = userSession.getString("username");
-                Toast.makeText(this, "Welcome to Game King, " + username, Toast.LENGTH_LONG).show();
-                Navigator.navigateTo(MainActivity.this, MainMenuActivity.class);
-                soundManager = SoundManager.getInstance(this);
-                soundManager.stopBGM();  // 停止當前背景音樂
-                soundManager.switchBGM(R.raw.bgm_menu);  // 切換到主選單的背景音樂
-
-                finish(); // End the current page to prevent the user from returning to the login page
-
+                // 顯示歡迎訊息
+                Toast.makeText(this, 
+                    String.format(getString(R.string.welcome_back), username), 
+                    Toast.LENGTH_LONG).show();
+                
+                // 不要停止音樂，只需切換
+                if (soundManager != null) {
+                    soundManager.switchBGM(R.raw.bgm_menu);
+                }
+                // 導航到主選單
+                Intent intent = new Intent(this, MainMenuActivity.class);
+                startActivity(intent);
             } catch (Exception e) {
                 UserSession.getInstance().clearUserSession(this);
                 Log.e(TAG, "Error retrieving user session data: " + e.getMessage());
             }
         }
+    }
 
+    @Override
+    public void onBackPressed() {
+        // 創建對話框
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        
+        // 創建自定義標題視圖
+        TextView titleView = new TextView(this);
+        titleView.setText(R.string.exit_title);
+        titleView.setGravity(Gravity.START);  // 左對齊
+        titleView.setPadding(40, 30, 40, 10); // 減少標題和內容之間的間距
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        titleView.setTextColor(Color.WHITE); // 白色標題
+        titleView.setTypeface(null, Typeface.BOLD);
+        
+        // 創建自定義消息視圖
+        TextView messageView = new TextView(this);
+        messageView.setText(R.string.exit_message);
+        messageView.setGravity(Gravity.START);  // 左對齊
+        messageView.setPadding(40, 10, 40, 30); // 減少與標題的間距
+        messageView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        messageView.setTextColor(Color.WHITE); // 白色內容
+        
+        builder.setCustomTitle(titleView)
+               .setView(messageView)
+               .setPositiveButton(R.string.exit_confirm, (dialog, which) -> {
+                    // 如果用戶確認要退出
+                    if (soundManager != null) {
+                        soundManager.stopBGM();
+                        soundManager.release();
+                    }
+                    // 完全退出應用程式
+                    finishAffinity();  // 結束所有活動
+                    System.exit(0);    // 確保完全退出
+               })
+               .setNegativeButton(R.string.exit_cancel, (dialog, which) -> {
+                    // 如果用戶取消，什麼都不做
+                    dialog.dismiss();
+               })
+               .setCancelable(false);  // 防止點擊對話框外部關閉
+
+        // 創建並顯示對話框
+        AlertDialog dialog = builder.create();
+        
+        // 設置對話框背景
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
+        }
+        
+        // 設置按鈕文字顏色
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            
+            if (positiveButton != null && negativeButton != null) {
+                // 確定按鈕設為綠色
+                positiveButton.setTextColor(getResources().getColor(R.color.dialog_confirm)); // 綠色
+                // 取消按鈕設為紅色
+                negativeButton.setTextColor(getResources().getColor(R.color.dialog_cancel)); // 紅色
+            }
+        });
+        
+        dialog.show();
     }
 }

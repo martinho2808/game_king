@@ -283,7 +283,13 @@ public class MenuActivity extends AppCompatActivity {
                 .putBoolean("isBGMEnabled", isBGMEnabled)
                 .putBoolean("isSoundEnabled", isSoundEnabled)
                 .apply();
+        
+        // 清除用戶會話
         UserSession.getInstance().clearUserSession(this);
+        
+        // 顯示登出成功提示
+        Toast.makeText(this, getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
+        
         // 返回主頁面
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
