@@ -27,7 +27,8 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
     private float dX, dY;
     private int lastAction;
 
-    private boolean isColliding;
+    private boolean shovelIsColliding;
+    private boolean boneIsColliding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,11 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
     protected void onResume() {
         super.onResume();
 
+//      State the view image
         shovel.setVisibility(View.INVISIBLE);
         bone.setVisibility(View.INVISIBLE);
+        badDog.setVisibility(View.VISIBLE);
+        goodDog.setVisibility(View.INVISIBLE);
 
         bucket.setOnClickListener(this);
 
@@ -93,9 +97,19 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
                         Log.i(TAG, "Action down");
                         dX = view.getX() - event.getRawX();
                         dY = view.getY() - event.getRawY();
-                        if(isColliding) {
+
+                        if(shovelIsColliding) {
                             Log.i(TAG, "changing the visibility of bone");
                             bone.setVisibility(View.VISIBLE);
+                        }
+
+                        if(boneIsColliding) {
+                            Log.i(TAG, "changing dog");
+                            badDog.setVisibility(View.INVISIBLE);
+                            goodDog.setVisibility(View.VISIBLE);
+                            cryingGirl.setVisibility(View.INVISIBLE);
+                            happyGirl.setVisibility(View.VISIBLE);
+                            bone.setVisibility(View.INVISIBLE);
                         }
                         break;
 
@@ -115,9 +129,9 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
                         view.setY(newY);
 
                         // Check collision
-                        isColliding = isCollision(view, bone);
-                        isColliding = isCollision(view, badDog);
-                        Log.i(TAG, "Collide: " + isColliding);
+                        shovelIsColliding = isCollision(view, bone);
+                        boneIsColliding = isCollision(view, badDog);
+                        Log.i(TAG, "Collide: " + shovelIsColliding);
                         break;
                     default:
                         return false;

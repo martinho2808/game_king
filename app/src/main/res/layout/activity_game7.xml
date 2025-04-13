@@ -43,6 +43,19 @@
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="157dp"
+        android:layout_marginTop="102dp"
+        android:text="@string/instruction"
+        android:textColor="@color/black"
+        android:textSize="20dp" />
+
     <View
         android:id="@+id/view"
         android:layout_width="wrap_content"
@@ -55,18 +68,37 @@
         android:longClickable="false" />
 
     <ImageView
+        android:id="@+id/tree"
+        android:layout_width="227dp"
+        android:layout_height="223dp"
+        android:layout_alignStart="@+id/view"
+        android:layout_alignBottom="@+id/view"
+        android:layout_marginBottom="320dp"
+        app:srcCompat="@drawable/tree" />
+
+    <ImageView
+        android:id="@+id/playground"
+        android:layout_width="210dp"
+        android:layout_height="394dp"
+        android:layout_alignEnd="@+id/view"
+        android:layout_alignBottom="@+id/view"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="200dp"
+        app:srcCompat="@drawable/playground" />
+
+
+    <ImageView
         android:id="@+id/pool"
-        android:layout_width="312dp"
+        android:layout_width="340dp"
         android:layout_height="289dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="93dp"
-        android:layout_marginBottom="75dp"
-        app:srcCompat="@drawable/sandpool"
+        android:layout_marginEnd="92dp"
+        android:layout_marginBottom="20dp"
         android:clickable="false"
         android:focusable="false"
-        android:longClickable="false" />
-
+        android:longClickable="false"
+        app:srcCompat="@drawable/sandpool" />
 
     <ImageView
         android:id="@+id/bone"
@@ -74,23 +106,10 @@
         android:layout_height="37dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="72dp"
-        android:layout_marginBottom="191dp"
+        android:layout_marginStart="68dp"
+        android:layout_marginBottom="139dp"
         android:visibility="invisible"
         app:srcCompat="@drawable/bone" />
-
-    <ImageView
-        android:id="@+id/happyGirl"
-        android:layout_width="51dp"
-        android:layout_height="55dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="345dp"
-        android:layout_marginEnd="30dp"
-        app:srcCompat="@drawable/happy"
-        android:clickable="false"
-        android:focusable="false"
-        android:longClickable="false" />
 
     <ImageView
         android:id="@+id/cryingGirl"
@@ -98,57 +117,69 @@
         android:layout_height="93dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginEnd="26dp"
-        android:layout_marginBottom="227dp"
-        app:srcCompat="@drawable/scary"
+        android:layout_marginEnd="27dp"
+        android:layout_marginBottom="163dp"
         android:clickable="false"
         android:focusable="false"
-        android:longClickable="false" />
+        android:longClickable="false"
+        app:srcCompat="@drawable/scary" />
+
+    <ImageView
+        android:id="@+id/happyGirl"
+        android:layout_width="54dp"
+        android:layout_height="93dp"
+        android:layout_alignStart="@+id/cryingGirl"
+        android:layout_alignEnd="@+id/cryingGirl"
+        android:layout_alignTop="@+id/cryingGirl"
+        android:layout_alignBottom="@+id/cryingGirl"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/happy" />
+
+    <ImageView
+        android:id="@+id/badDog"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="204dp"
+        android:layout_marginBottom="163dp"
+        android:visibility="visible"
+        app:srcCompat="@drawable/baddog" />
+
+    <ImageView
+        android:id="@+id/goodDog"
+        android:layout_width="80dp"
+        android:layout_height="90dp"
+        android:layout_alignEnd="@id/badDog"
+        android:layout_alignStart="@id/badDog"
+        android:layout_alignTop="@+id/badDog"
+        android:layout_alignBottom="@+id/badDog"
+        app:srcCompat="@drawable/gooddog"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/bucket"
         android:layout_width="38dp"
         android:layout_height="44dp"
+        android:layout_above="@+id/pool"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="401dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginBottom="-76dp"
         android:clickable="false"
         android:focusable="false"
         android:longClickable="false"
         app:srcCompat="@drawable/sandbucket" />
 
     <ImageView
-        android:id="@+id/badDog"
-        android:layout_width="63dp"
-        android:layout_height="68dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="196dp"
-        android:layout_marginBottom="215dp"
-        app:srcCompat="@drawable/baddog"
-        android:visibility="visible" />
-
-    <ImageView
-        android:id="@+id/goodDog"
-        android:layout_width="53dp"
-        android:layout_height="72dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="435dp"
-        android:layout_marginEnd="199dp"
-        app:srcCompat="@drawable/gooddog"
-        tools:visibility="invisible" />
-
-    <ImageView
         android:id="@+id/shovel"
         android:layout_width="39dp"
         android:layout_height="42dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="82dp"
-        android:layout_marginTop="370dp"
+        android:layout_alignTop="@+id/bucket"
+        android:layout_alignBottom="@+id/bucket"
+        android:layout_alignStart="@id/bucket"
+        android:layout_alignEnd="@+id/bucket"
         android:focusableInTouchMode="false"
+        android:visibility="visible"
         app:srcCompat="@drawable/shovel"
         tools:visibility="invisible" />
 
