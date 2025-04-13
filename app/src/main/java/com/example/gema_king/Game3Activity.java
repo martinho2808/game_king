@@ -1,11 +1,8 @@
 package com.example.gema_king;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -14,9 +11,11 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.example.gema_king.model.StatusManager;
+import com.example.gema_king.model.UserSession;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -59,6 +58,8 @@ public class Game3Activity extends MenuActivity {
     private Block[][] blocks;
     private Handler mines;
     private View minesView;
+    private final int gameId = 30;
+    private int recordId;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -73,6 +74,14 @@ public class Game3Activity extends MenuActivity {
         flagbtn = (Button) findViewById(R.id.flag);
         setupToolbar();
         init();
+
+        //Handle status
+        UserSession.getUserId(this);
+        StatusManager.init(this);
+        recordId =  StatusManager.initGameStatus(UserSession.getUserId(this),gameId);
+        StatusManager.updateGamePlayed(UserSession.getUserId(this));
+
+
 
         Button btnStartGame = findViewById(R.id.btn_start_game);
         btnStartGame.setOnClickListener(v -> {

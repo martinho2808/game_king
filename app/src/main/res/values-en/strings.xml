@@ -140,6 +140,10 @@
     <string name="game3_second">🎯seconds</string>
     <string name="game3_score">🎯Score: </string>
 
+    <!-- game stage 4 resource -->
+    <string name="game4_start_instructions_g5">🎯 Catch me if you can! \nTo complete the task!</string>
+    <string name="game4_score">🎯Score: </string>
+
     <!-- game stage 5 resource -->
     <string name="countdown_text">Time Left: %d</string>
     <string name="target_color_text">Target Color: %s</string>

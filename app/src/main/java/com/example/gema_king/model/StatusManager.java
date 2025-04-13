@@ -49,16 +49,13 @@ public class StatusManager {
         GameStatus gameStatus = dbHelper.getStatusById(recordId);
         int updatePlayTime;
         int updateScore = Math.max(gameStatus.getScore(), score);
-        if(gameStatus.getPlayTime() != 0){
-            if(score < gameStatus.getScore()) {
-                updatePlayTime = playTime;
-            } else if (score == gameStatus.getScore()){
-                updatePlayTime = Math.min(gameStatus.getPlayTime(), playTime);
-            } else {
-                updatePlayTime = gameStatus.getPlayTime();
-            }
-        } else {
+
+        if(score < gameStatus.getScore()) {
             updatePlayTime = playTime;
+        } else if (score == gameStatus.getScore()){
+            updatePlayTime = Math.min(gameStatus.getPlayTime(), playTime);
+        } else {
+            updatePlayTime = gameStatus.getPlayTime();
         }
 
         dbHelper.updateStatusById(recordId, game_finished, updateScore, updatePlayTime);

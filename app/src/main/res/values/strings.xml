@@ -132,6 +132,9 @@
     <string name="game3_second">🎯秒</string>
     <string name="game3_score">🎯分數: </string>
 
+    <!-- game stage 4 resource -->
+    <string name="game4_start_instructions_g5">🎯 如果你能的話，抓住我！\n以完成任務！</string>
+    <string name="game4_score">🎯分數: </string>
     <!-- game stage 5 resource -->
     <string name="countdown_text">剩下時間: %d</string>
     <string name="target_color_text">目標顏色: %s</string>
