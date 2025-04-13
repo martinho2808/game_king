@@ -134,7 +134,7 @@
     <string name="target_color_text">目標顏色: %s</string>
     <string name="score_text">分數: %d</string>
     <string name="combo_text">連擊數: %d</string>
-    <string name="start_instructions_g5">🎯 點擊與目標顏色相同的球來得分！\n連續命中有加分，錯誤會扣分！</string>
+    <string name="start_instructions_g5">🎯 點擊與目標顏色相同的球來得300分！\n連續命中有加分，錯誤會扣分！</string>
     <string name="btn_start_game">開始遊戲</string>
     <string name="end_message">遊戲結束</string>
     <string name="end_action_button">再來一次</string>
@@ -151,6 +151,22 @@
     <string name="start_instructions_g6">🕹️ 傾斜手機左右移動閃避障礙物！\n保持 HP 並撐過 30 秒！</string>
     <string name="end_success_g6">🎉 恭喜！你撐過了 30 秒！</string>
 
-    <!--    Game 7-->
+    <!--    Game 7 -->
     <string name="instruction">Save the girl!!</string>
+  
+    <!-- Leaderboard -->
+    <string name="leaderboard_title">🏆 排行榜</string>
+    <string name="current_player_record">你的紀錄</string>
+    <string name="current_player_score">分數: %1$d</string>
+    <string name="current_player_use_time">時間: %1$d 秒</string>
+    <!-- player ranking -->
+    <string name="username_text">玩家名稱</string>
+    <string name="ranking_score">分數: %1$d</string>
+    <string name="ranking_time">時間: %1$d 秒</string>
+    <string name="btn_details">詳細</string>
+    <!-- detail info -->
+    <string name="detail_title">詳細成績</string>
+    <string name="signal_game_id">遊戲 %1$d</string>
+    <string name="signal_score">分數: %1$d</string>
+    <string name="signal_time">時間: %1$d 秒</string>
 </resources>

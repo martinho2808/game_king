@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -127,13 +128,16 @@ public class MainMenuActivity extends MenuActivity {
 
                 if (tvTotalPlayTime != null && tvHighestScore != null) {
                     // 將總遊戲時間轉換為小時和分鐘
-                    int hours = totalPlayTime / 60;
-                    int minutes = totalPlayTime % 60;
+                    int hours = totalPlayTime / 3600;
+                    int minutes = (totalPlayTime % 3600) / 60;
+                    int seconds = totalPlayTime % 60;
                     String playTimeText = "";
                     if (hours > 0) {
-                        playTimeText = getString(R.string.total_play_time_format, hours, minutes);
-                    } else {
+                        playTimeText = getString(R.string.total_play_time_format, hours, minutes);  
+                    } else if (minutes > 0) {
                         playTimeText = getString(R.string.total_play_time_minutes, minutes);
+                    } else {
+                        playTimeText = getString(R.string.total_play_time_seconds, seconds);
                     }
 
                     tvTotalPlayTime.setText(playTimeText);
@@ -159,9 +163,19 @@ public class MainMenuActivity extends MenuActivity {
         btnStartGame.setOnClickListener(v -> {
             // TODO: 實現開始遊戲的邏輯
             Log.e("MainMenuActivity", "Start Game");
-            Intent intent = new Intent(this, Game1Activity.class);
+            Intent intent = new Intent(this, Game5Activity.class);
             startActivity(intent);
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_leaderboard) {
+            startActivity(new Intent(this, LeaderboardActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 //    @Override

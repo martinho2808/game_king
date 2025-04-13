@@ -1,5 +1,6 @@
 package com.example.gema_king;
 
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
+import com.example.gema_king.model.StatusManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 

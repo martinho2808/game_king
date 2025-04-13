@@ -1,5 +1,6 @@
 package com.example.gema_king;
 
+
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -10,6 +11,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -17,6 +19,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.gema_king.model.StatusManager;
+import com.example.gema_king.model.UserSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +45,9 @@ public class Game6Activity extends AppCompatActivity {
     private boolean isRunning = false;
     private final int GAME_DURATION = 30000;
     private final List<View> obstacles = new ArrayList<>();
+    private static final int GAME_ID = 60;
 
+    private int recordId;
     private final int[] speeds = {5, 8, 10, 6, 12};
     private final int[] colors = {
             Color.RED, Color.YELLOW, Color.CYAN, Color.MAGENTA, Color.GREEN
@@ -53,7 +60,7 @@ public class Game6Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game6);
-
+        StatusManager.init(this);
         gameLayer = findViewById(R.id.game_layer);
         player = findViewById(R.id.player);
         healthText = findViewById(R.id.health_text);
@@ -65,7 +72,6 @@ public class Game6Activity extends AppCompatActivity {
         Button btnStartGame = findViewById(R.id.btn_start_game);
         endMessage = findViewById(R.id.end_message);
         endActionButton = findViewById(R.id.end_action_button);
-
         btnStartGame.setOnClickListener(v -> {
             startOverlay.setVisibility(View.GONE);
             gameLayer.post(this::startGame);
@@ -119,6 +125,9 @@ public class Game6Activity extends AppCompatActivity {
     };
 
     private void startGame() {
+        long userId = UserSession.getUserId(this);
+        recordId = StatusManager.initGameStatus((int) userId, GAME_ID);
+        StatusManager.updateGameStatusToProgress(recordId);
         isRunning = true;
         playerHealth = 5;
         score = 0;
@@ -244,18 +253,32 @@ public class Game6Activity extends AppCompatActivity {
         isRunning = false;
         handler.removeCallbacksAndMessages(null);
 
+        // 計算耗時
+        long elapsedMillis = System.currentTimeMillis() - startTime;
+        int playTime = (int) (elapsedMillis / 1000);
+        int finalScore = Math.min(score, 300);
+
+        // ✅ 成功才儲存分數與時間
+        if (survivedTime && recordId != -1) {
+            StatusManager.updateGameStatusToFinish(recordId, finalScore, playTime);
+            long userId = UserSession.getUserId(this);
+            Log.d("Game6Activity", "✅ 分數儲存成功 - userId: " + userId + ", score: " + finalScore + ", playTime: " + playTime + ", gameId: " + GAME_ID);
+        } else {
+            Log.d("Game6Activity", "未通關，分數不儲存。score=" + finalScore + ", time=" + playTime);
+        }
+
+        // 顯示結束畫面
         if (survivedTime) {
             endMessage.setText(getString(R.string.end_success_g6) + "\n" +
-                    getString(R.string.score_text, score));
+                    getString(R.string.score_text, finalScore));
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(v -> {
-                //Intent intent = new Intent(Game6Activity.this, Game7Activity.class);
-                //startActivity(intent);
-                //finish();
+                // startActivity(new Intent(Game6Activity.this, Game7Activity.class));
+                // finish();
             });
         } else {
             endMessage.setText(getString(R.string.end_fail) + "\n" +
-                    getString(R.string.score_text, score));
+                    getString(R.string.score_text, finalScore));
             endActionButton.setText(getString(R.string.retry));
             endActionButton.setOnClickListener(v -> {
                 endOverlay.setVisibility(View.GONE);
