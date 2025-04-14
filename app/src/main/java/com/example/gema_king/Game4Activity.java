@@ -135,7 +135,9 @@ public class Game4Activity extends MenuActivity {
         }.start();
     }
 
+    @SuppressLint("SetTextI18n")
     private void startGame() {
+        StatusManager.updateGameStatusToProgress(recordId);
         gameStarted = true;
         hideImages();
 
@@ -158,7 +160,7 @@ public class Game4Activity extends MenuActivity {
                 }
 
                 runOnUiThread(() -> {
-                    //startOverlay.setVisibility(View.VISIBLE);
+                    StatusManager.updateGameStatusToFinish(recordId, score, 0);
                     String scoreText = getString(R.string.game4_score);
                     endMessage.setText(getString(R.string.end_success_g5) + "\n" + scoreText + score);
                     endActionButton.setText(getString(R.string.next_stage));
