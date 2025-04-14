@@ -128,6 +128,7 @@ public class Game6Activity extends AppCompatActivity {
     private void startGame() {
         long userId = UserSession.getUserId(this);
         recordId = StatusManager.initGameStatus((int) userId, GAME_ID);
+        StatusManager.updateGamePlayed(UserSession.getUserId(this););
         StatusManager.updateGameStatusToProgress(recordId);
         isRunning = true;
         playerHealth = 5;
@@ -274,8 +275,8 @@ public class Game6Activity extends AppCompatActivity {
                     getString(R.string.score_text, finalScore));
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(v -> {
-                //startActivity(new Intent(Game6Activity.this, Game7Activity.class));
-                //finish();
+                startActivity(new Intent(Game6Activity.this, Game7Activity.class));
+                finish();
             });
         } else {
             endMessage.setText(getString(R.string.end_fail) + "\n" +
