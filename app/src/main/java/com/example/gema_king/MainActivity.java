@@ -183,38 +183,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        if (soundManager == null) {
-            soundManager = SoundManager.getInstance(this);
-        }
-        
-        // 檢查並確保背景音樂正確播放
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
-        
-        if (isBGMEnabled) {
-            // 如果當前沒有播放主頁面的背景音樂，則切換並播放
-            if (!soundManager.isBGMPlaying() || soundManager.getCurrentBGM() != R.raw.bgm_main) {
-                soundManager.switchBGM(R.raw.bgm_main);
-                soundManager.startBGM();
-            }
+        // 檢查並切換背景音樂
+        if (SoundManager.getInstance(this).getCurrentBGM() != R.raw.bgm_main) {
+            SoundManager.getInstance(this).switchBGM(R.raw.bgm_main);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // 只有在應用即將退出時才暫停音樂
-        if (isFinishing()) {
-            soundManager.pauseBGM();
-        }
+        // 不要在這裡停止背景音樂，讓它繼續播放
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (soundManager != null && isFinishing()) {
-            soundManager.release();
-            soundManager = null;
+        // 只有在完全退出應用時才停止背景音樂
+        if (isFinishing()) {
+            SoundManager.getInstance(this).stopBGM();
         }
     }
 

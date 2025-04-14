@@ -11,6 +11,7 @@ import java.io.IOException;
 import android.os.Handler;
 import android.os.Looper;
 import android.content.SharedPreferences;
+import java.util.HashMap;
 
 public class SoundManager {
     private static final String TAG = "SoundManager";
@@ -23,14 +24,15 @@ public class SoundManager {
     private static SoundManager instance;
     private final Context context;
     private SoundPool soundPool;
+    private final HashMap<Integer, Integer> soundMap;
     private MediaPlayer bgmPlayer;
     private MediaPlayer loginSuccessPlayer;
-    private int buttonClickSoundId;
+    private int buttonClickSound;
     private int loginSuccessSoundId;
-    private float bgmVolume = 0.5f;
+    private float bgmVolume = 1.0f;
     private float sfxVolume = 1.0f;
     private boolean isBGMPlaying = false;
-    private int currentBGM = R.raw.bgm_main; // 默認主菜單音樂
+    private int currentBGM = -1;
     private boolean isBGMEnabled = true;
     private boolean isSoundEnabled = true;
     private boolean isInitialized = false;
@@ -39,8 +41,20 @@ public class SoundManager {
     private SoundManager(Context context) {
         this.context = context.getApplicationContext();
         loadSettings(); // 加載保存的設置
-        initSoundPool();
+        
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(10)
+                .setAudioAttributes(audioAttributes)
+                .build();
+                
+        soundMap = new HashMap<>();
         loadSounds();
+        isInitialized = true;
     }
 
     public static synchronized SoundManager getInstance(Context context) {
@@ -50,27 +64,9 @@ public class SoundManager {
         return instance;
     }
 
-    private void initSoundPool() {
-        if (soundPool != null) {
-            soundPool.release();
-        }
-        
-        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build();
-        
-        soundPool = new SoundPool.Builder()
-                .setMaxStreams(5)
-                .setAudioAttributes(audioAttributes)
-                .build();
-                
-        isInitialized = true;
-    }
-
     private void loadSounds() {
         if (soundPool != null) {
-            buttonClickSoundId = soundPool.load(context, R.raw.button_click, 1);
+            buttonClickSound = soundPool.load(context, R.raw.button_click, 1);
             loginSuccessSoundId = soundPool.load(context, R.raw.login_success, 1);
         }
     }
@@ -144,35 +140,45 @@ public class SoundManager {
             
             if (isBGMEnabled) {
                 try {
+                    // 先停止當前的音樂
+                    if (bgmPlayer != null) {
+                        try {
+                            if (bgmPlayer.isPlaying()) {
+                                bgmPlayer.stop();
+                            }
+                            bgmPlayer.release();
+                            bgmPlayer = null;
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error stopping old BGM: " + e.getMessage());
+                        }
+                    }
+
                     // 創建新的 MediaPlayer 實例
-                    MediaPlayer newPlayer = new MediaPlayer();
-                    newPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                    bgmPlayer = new MediaPlayer();
+                    bgmPlayer.setAudioAttributes(new AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_GAME)
                             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                             .build());
-                    newPlayer.setDataSource(context.getResources().openRawResourceFd(newBGM));
-                    newPlayer.setLooping(true);
-                    newPlayer.setVolume(bgmVolume, bgmVolume);
-                    newPlayer.prepare();
-
-                    // 設置監聽器
-                    newPlayer.setOnPreparedListener(mp -> {
-                        // 當新的音樂準備好後，停止舊的並開始播放新的
-                        if (bgmPlayer != null) {
-                            try {
-                                if (bgmPlayer.isPlaying()) {
-                                    bgmPlayer.stop();
-                                }
-                                bgmPlayer.release();
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error stopping old BGM: " + e.getMessage());
-                            }
-                        }
-                        bgmPlayer = newPlayer;
+                    bgmPlayer.setDataSource(context.getResources().openRawResourceFd(newBGM));
+                    bgmPlayer.setLooping(true);
+                    bgmPlayer.setVolume(bgmVolume, bgmVolume);
+                    
+                    // 設置準備完成的監聽器
+                    bgmPlayer.setOnPreparedListener(mp -> {
                         bgmPlayer.start();
                         isBGMPlaying = true;
                         Log.d(TAG, "Successfully switched BGM to: " + newBGM);
                     });
+                    
+                    // 設置錯誤監聽器
+                    bgmPlayer.setOnErrorListener((mp, what, extra) -> {
+                        Log.e(TAG, "MediaPlayer error: " + what + ", " + extra);
+                        isBGMPlaying = false;
+                        currentBGM = oldBGM;  // 恢復原來的BGM
+                        return true;
+                    });
+                    
+                    bgmPlayer.prepareAsync();
 
                 } catch (Exception e) {
                     Log.e(TAG, "Error switching BGM: " + e.getMessage());
@@ -183,9 +189,24 @@ public class SoundManager {
         }
     }
 
-    public void playGameSound(int soundId) {
-        if (isSoundEnabled && soundPool != null) {
-            soundPool.play(soundId, sfxVolume, sfxVolume, 1, 0, 1.0f);
+    public void playGameSound(int soundResourceId) {
+        if (isSoundEnabled) {
+            // 檢查是否已經載入過這個音效
+            if (!soundMap.containsKey(soundResourceId)) {
+                // 如果沒有載入過，就載入並保存
+                int soundId = soundPool.load(context, soundResourceId, 1);
+                soundMap.put(soundResourceId, soundId);
+                // 等待載入完成後播放
+                soundPool.setOnLoadCompleteListener((soundPool, sampleId, status) -> {
+                    if (status == 0) { // 0 表示載入成功
+                        soundPool.play(soundId, sfxVolume, sfxVolume, 1, 0, 1.0f);
+                    }
+                });
+            } else {
+                // 如果已經載入過，直接播放
+                int soundId = soundMap.get(soundResourceId);
+                soundPool.play(soundId, sfxVolume, sfxVolume, 1, 0, 1.0f);
+            }
         }
     }
 
@@ -196,8 +217,8 @@ public class SoundManager {
     }
 
     public void playButtonClick() {
-        if (isSoundEnabled && soundPool != null) {
-            soundPool.play(buttonClickSoundId, sfxVolume, sfxVolume, 1, 0, 1.0f);
+        if (isSoundEnabled) {
+            soundPool.play(buttonClickSound, sfxVolume, sfxVolume, 1, 0, 1.0f);
         }
     }
 
@@ -292,18 +313,37 @@ public class SoundManager {
     }
 
     public void release() {
+        if (bgmPlayer != null) {
+            bgmPlayer.release();
+            bgmPlayer = null;
+        }
         if (soundPool != null) {
             soundPool.release();
             soundPool = null;
         }
-        stopBGM();
-        isInitialized = false;
         instance = null;
     }
 
     public void reinitialize() {
-        initSoundPool();
+        // 重新初始化音效池
+        if (soundPool != null) {
+            soundPool.release();
+        }
+        
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(10)
+                .setAudioAttributes(audioAttributes)
+                .build();
+                
         loadSounds();
+        isInitialized = true;
+        
+        // 如果背景音樂已啟用，重新開始播放
         if (isBGMEnabled) {
             startBGM();
         }
@@ -322,7 +362,7 @@ public class SoundManager {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         isBGMEnabled = prefs.getBoolean(KEY_BGM_ENABLED, true);
         isSoundEnabled = prefs.getBoolean(KEY_SOUND_ENABLED, true);
-        bgmVolume = prefs.getFloat(KEY_BGM_VOLUME, 0.5f);
+        bgmVolume = prefs.getFloat(KEY_BGM_VOLUME, 1.0f);
         sfxVolume = prefs.getFloat(KEY_SFX_VOLUME, 1.0f);
     }
 
