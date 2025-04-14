@@ -1,14 +1,14 @@
 package com.example.gema_king;
 
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,11 +16,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Game7Activity extends AppCompatActivity implements View.OnClickListener{
+public class Game8Activity extends AppCompatActivity {
 
-    private static final String TAG = "Game7Activity";
 
-    private ImageView cryingGirl, happyGirl, television, tragic, scissor;
+    private static final String TAG = "Game8Activity";
+
+    private ImageView cryingGirl, happyGirl, scissor, television, tragic;
+
+    RadioButton tvbtn;
 
     private View parentView;
 
@@ -44,9 +47,11 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
         cryingGirl = findViewById(R.id.cryingGirl);
         happyGirl = findViewById(R.id.happyGirl);
 
+        scissor = findViewById(R.id.scissor);
         television = findViewById(R.id.television);
         tragic = findViewById(R.id.tragic);
-        scissor = findViewById(R.id.scissor);
+
+        tvbtn = findViewById(R.id.radioButton);
     }
 
     @Override
@@ -56,7 +61,15 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
 //      State the view image
         television.setVisibility(View.INVISIBLE);
 
-        tragic.setOnClickListener(this);
+        tvbtn.setOnClickListener(v -> {
+            boolean newState = !tvbtn.isChecked();
+            tvbtn.setChecked(newState); // Manually toggle
+
+            television.setVisibility(View.VISIBLE);
+            tragic.setVisibility(View.INVISIBLE);
+            happyGirl.setVisibility(View.VISIBLE);
+            cryingGirl.setVisibility(View.INVISIBLE);
+        });
 
         parentView = (View) scissor.getParent();
         parentView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -71,14 +84,6 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
         });
     }
 
-    @Override
-    public void onClick(View v) {
-        Log.i(TAG, "Start clicking");
-        if (v.getId() == tragic.getId()) {
-            tragic.setVisibility(View.INVISIBLE);
-            television.setVisibility(View.VISIBLE);
-        }
-    }
     private View.OnTouchListener createDragListener(final int parentWidth, final int parentHeight) {
         return new View.OnTouchListener() {
             private float dX, dY;
@@ -115,4 +120,5 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
             }
         };
     }
+
 }

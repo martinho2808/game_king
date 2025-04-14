@@ -166,6 +166,12 @@
     <string name="start_instructions_g6">🕹️ Tilt your phone left or right to dodge obstacles!\nKeep your HP and survive for 30 seconds!</string>
     <string name="end_success_g6">🎉 Congratulations! You survived 30 seconds!</string>
 
+    <!--    Game 7 -->
+    <string name="instruction7">Save the girl!!</string>
+
+    <!--    Game 8 -->
+    <string name="instruction8">"I don't want to see the tragic ending"</string>
+
     <!-- Leaderboard -->
     <string name="leaderboard_title">🏆 Leaderboard</string>
     <string name="current_player_record">Your Record</string>
