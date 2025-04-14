@@ -128,7 +128,7 @@ public class Game6Activity extends AppCompatActivity {
     private void startGame() {
         long userId = UserSession.getUserId(this);
         recordId = StatusManager.initGameStatus((int) userId, GAME_ID);
-        StatusManager.updateGamePlayed(UserSession.getUserId(this););
+        StatusManager.updateGamePlayed(UserSession.getUserId(this));
         StatusManager.updateGameStatusToProgress(recordId);
         isRunning = true;
         playerHealth = 5;
