@@ -158,7 +158,7 @@ public class Game8Activity extends MenuActivity {
         endMessage.setText(getString(R.string.end_success_g5) + "\n" + scoreText + score);
         endActionButton.setText(getString(R.string.next_stage));
         endActionButton.setOnClickListener(view -> {
-            Intent intent = new Intent(Game8Activity.this, Game6Activity.class);
+            Intent intent = new Intent(Game8Activity.this, Game9Activity.class);
             startActivity(intent);
             finish();
         });
