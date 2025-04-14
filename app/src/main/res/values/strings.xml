@@ -158,8 +158,11 @@
     <string name="end_success_g6">🎉 恭喜！你撐過了 30 秒！</string>
 
     <!--    Game 7 -->
-    <string name="instruction">Save the girl!!</string>
-  
+    <string name="instruction7">救救女孩吧！ ！</string>
+
+    <!--    Game 8 -->
+    <string name="instruction8">我不想看到悲劇的結局</string>
+
     <!-- Leaderboard -->
     <string name="leaderboard_title">🏆 排行榜</string>
     <string name="current_player_record">你的紀錄</string>
