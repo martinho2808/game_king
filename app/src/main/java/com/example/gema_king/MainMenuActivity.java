@@ -23,6 +23,7 @@ import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AlertDialog;
 
+import com.example.gema_king.model.StatusManager;
 import com.example.gema_king.model.UserSession;
 import com.google.android.material.button.MaterialButton;
 
@@ -180,9 +181,8 @@ public class MainMenuActivity extends MenuActivity {
 
     private void setupClickListeners() {
         btnStartGame.setOnClickListener(v -> {
-            // TODO: 實現開始遊戲的邏輯
-            Log.e("MainMenuActivity", "Start Game");
-            Intent intent = new Intent(this, Game1Activity.class);
+            soundManager.playButtonClick();
+            Intent intent = new Intent(MainMenuActivity.this, Game1Activity.class);
             startActivity(intent);
         });
     }
@@ -200,26 +200,25 @@ public class MainMenuActivity extends MenuActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // 確保音樂管理器存在
-        if (soundManager == null) {
-            soundManager = SoundManager.getInstance(this);
+        // 檢查並切換背景音樂
+        if (SoundManager.getInstance(this).getCurrentBGM() != R.raw.bgm_main) {
+            SoundManager.getInstance(this).switchBGM(R.raw.bgm_main);
         }
-        
-        // 檢查並確保背景音樂正確播放
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
-        
-        if (isBGMEnabled) {
-            if (!soundManager.isBGMPlaying() || soundManager.getCurrentBGM() != R.raw.bgm_menu) {
-                soundManager.switchBGM(R.raw.bgm_menu);
-                soundManager.startBGM();
-            }
-        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // 不要在這裡停止背景音樂，讓它繼續播放
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // 只有在完全退出應用時才停止背景音樂
+        if (isFinishing()) {
+            SoundManager.getInstance(this).stopBGM();
+        }
         if (isFinishing()) {
             dbHelper.close();
         }

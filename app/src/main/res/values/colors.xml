@@ -10,7 +10,7 @@
     <!-- Material Design 預設顏色 -->
     <color name="purple_500">#6200EE</color>
     <color name="purple_700">#3700B3</color>
-    <color name="teal_200">#03DAC6</color>
+    <color name="teal_200">#03DAC5</color>
     <color name="teal_700">#018786</color>
 
     <!-- 背景顏色 -->
@@ -63,4 +63,7 @@
     <!-- 對話框按鈕顏色 -->
     <color name="dialog_confirm">#4CAF50</color>
     <color name="dialog_cancel">#F44336</color>
+
+    <!-- 新增遊戲背景顏色 -->
+    <color name="game_background">#1C1B1F</color>
 </resources>

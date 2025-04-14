@@ -181,4 +181,49 @@
     <string name="exit_message">確定要退出應用程式嗎？</string>
     <string name="exit_confirm">確定</string>
     <string name="exit_cancel">取消</string>
+
+    <!-- Game 9 Strings -->
+    <string name="game9_title">數學謎題速遞</string>
+    <string name="game9_start">開始遊戲</string>
+    <string name="game9_complete">遊戲結束</string>
+    <string name="game9_start_message">準備好挑戰你的數學能力了嗎？</string>
+    <string name="game9_rules">遊戲規則：\n• 每題有15秒的答題時間\n• 答對得分越快分數越高\n• 答錯不扣分但失去時間獎勵\n• 共10題題目，挑戰你的極限！</string>
+    <string name="game9_question_number">第 %1$d/%2$d 題</string>
+    <string name="game9_score_format">得分：%d</string>
+    <string name="game9_time_format">⏱ %1$.1f秒</string>
+    <string name="game9_time_warning">⚠ %1$.1f秒</string>
+    <string name="game9_time_up">時間到！</string>
+    <string name="game9_correct">正確！+%d 分</string>
+    <string name="game9_wrong">答錯了！</string>
+    <string name="game9_end_message">最終得分：%1$d\n正確率：%2$d%%</string>
+    <string name="game9_stats">題目總數：%1$d\n答對題數：%2$d</string>
+    <string name="game9_next_game">下一關</string>
+    <string name="game9_new_record">🎉 新紀錄！破紀錄了！🎉</string>
+
+    <!-- Game 10 -->
+    <string name="game10_title">傾斜迷宮逃生</string>
+    <string name="game10_description">通過傾斜設備來引導球穿過迷宮</string>
+    <string name="game10_rules">1. 傾斜設備來控制球的移動\n2. 避開黃色障礙物\n3. 到達綠色終點即可獲勝\n4. 碰到障礙物會重置位置</string>
+    <string name="game10_start">開始遊戲</string>
+    <string name="game10_start_message">準備好挑戰你的平衡能力了嗎？</string>
+    <string name="game10_complete">恭喜完成遊戲！</string>
+    <string name="game_complete">恭喜完成遊戲！</string>
+    <string name="game_over">遊戲結束！</string>
+    <string name="play_again">再玩一次</string>
+    <string name="error_loading_game">載入遊戲時發生錯誤</string>
+    <string name="try_again">再試一次</string>
+    <string name="game10_complete_message">恭喜完成！\n您的分數：%1$d\n完成時間：%2$d 秒</string>
+    <string name="game10_new_record">🎉 新紀錄！破紀錄了！🎉</string>
+    <string name="game10_attempts">🔄 嘗試次數: %d</string>
+    <string name="next_game">下一關</string>
+    <string name="game10_time_format">⏱️ %d 秒</string>
+    <string name="game10_time_format_minutes">⏱️ %d 分 %d 秒</string>
+    <string name="game10_score">分數: %d</string>
+    <string name="new_record">新紀錄！</string>
+
+    <!-- Game11 相關字串 -->
+    <string name="game11_title">遊戲 11</string>
+    <string name="game11_start_message">準備好開始遊戲了嗎？</string>
+    <string name="game11_rules">遊戲規則：\n這是一個新的遊戲，請按照指示完成挑戰。</string>
+    <string name="game11_start">開始遊戲</string>
 </resources>

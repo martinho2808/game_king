@@ -140,10 +140,6 @@
     <string name="game3_second">🎯seconds</string>
     <string name="game3_score">🎯Score: </string>
 
-    <!-- game stage 4 resource -->
-    <string name="game4_start_instructions_g5">🎯 Catch me if you can! \nTo complete the task!</string>
-    <string name="game4_score">🎯Score: </string>
-
     <!-- game stage 5 resource -->
     <string name="countdown_text">Time Left: %d</string>
     <string name="target_color_text">Target Color: %s</string>
@@ -186,4 +182,47 @@
     <string name="exit_message">Are you sure you want to exit?</string>
     <string name="exit_confirm">Confirm</string>
     <string name="exit_cancel">Cancel</string>
+
+    <!-- Game 9 Strings -->
+    <string name="game9_title">Math Riddle Rush</string>
+    <string name="game9_start">Start Game</string>
+    <string name="game9_complete">Game completed</string>
+    <string name="game9_start_message">Ready to test your math skills?</string>
+    <string name="game9_rules">Game Rules:\n• Each question has a 15-second time limit\n• Score higher based on faster answers\n• Wrong answers don\'t deduct time\n• 10 questions - Challenge your limits!</string>
+    <string name="game9_question_number">Question %1$d/%2$d</string>
+    <string name="game9_score_format">Score: %d</string>
+    <string name="game9_time_format">⏱ %1$.1fs</string>
+    <string name="game9_time_warning">⚠ %1$.1fs</string>
+    <string name="game9_time_up">Time\'s Up!</string>
+    <string name="game9_correct">Correct! +%d points</string>
+    <string name="game9_wrong">Wrong Answer!</string>
+    <string name="game9_end_message">Final Score: %1$d\nAccuracy: %2$d%%</string>
+    <string name="game9_stats">Questions: %1$d\nCorrect Answers: %2$d</string>
+    <string name="game9_next_game">Next Game</string>
+    <string name="game9_new_record">🎉 New High Score! 🎉</string>
+
+    <!-- Game 10 -->
+    <string name="game10_title">Tilt Maze Escape</string>
+    <string name="game10_description">Guide the ball through the maze by tilting your device</string>
+    <string name="game10_rules">1. Tilt your device to control the ball\'s movement\n2. Avoid yellow obstacles\n3. Reach the green finish line to win\n4. Hitting obstacles will reset your position</string>
+    <string name="game10_start">Start Game</string>
+    <string name="game10_start_message">Ready to test your balance skills?</string>
+    <string name="game10_complete">Congratulations! Game completed!</string>
+    <string name="game_complete">Congratulations! Game completed!</string>
+    <string name="game_over">Game Over!</string>
+    <string name="play_again">Play Again</string>
+    <string name="error_loading_game">Error loading game</string>
+    <string name="game10_complete_message">Congratulations!\nYour Score: %1$d\nTime: %2$d seconds</string>
+    <string name="game10_new_record">🎉 New High Score! 🎉</string>
+    <string name="game10_attempts">🔄 Attempts: %d</string>
+    <string name="next_game">Next Level</string>
+    <string name="game10_time_format">⏱️ %ds</string>
+    <string name="game10_time_format_minutes">⏱️ %dm %ds</string>
+    <string name="game10_score">Score: %d</string>
+
+    <!-- Game11 相關字串 -->
+    <string name="game11_title">Game 11</string>
+    <string name="game11_start_message">Ready to start the game?</string>
+    <string name="game11_rules">Game Rules:\nThis is a new game, please follow the instructions to complete the challenge.</string>
+    <string name="game11_start">Start Game</string>
 </resources>
