@@ -157,6 +157,10 @@ public class Game4Activity extends MenuActivity {
                     image.setVisibility(View.INVISIBLE);
                 }
 
+
+                int playTime = 15;
+                StatusManager.updateGameStatusToFinish(recordId, score, playTime);
+
                 runOnUiThread(() -> {
                     //startOverlay.setVisibility(View.VISIBLE);
                     String scoreText = getString(R.string.game4_score);

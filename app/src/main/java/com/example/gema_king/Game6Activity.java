@@ -2,6 +2,7 @@ package com.example.gema_king;
 
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.hardware.Sensor;
@@ -81,7 +82,7 @@ public class Game6Activity extends AppCompatActivity {
             endOverlay.setVisibility(View.GONE);
             startOverlay.setVisibility(View.VISIBLE);
         });
-        // 觸控拖曳備用方式
+        // Touch mode
         //gameLayer.setOnTouchListener((v, event) -> {
         //    if (event.getAction() == MotionEvent.ACTION_MOVE) {
         //        float x = event.getX() - player.getWidth() / 2f;
@@ -258,7 +259,7 @@ public class Game6Activity extends AppCompatActivity {
         int playTime = (int) (elapsedMillis / 1000);
         int finalScore = Math.min(score, 300);
 
-        // ✅ 成功才儲存分數與時間
+        //Save the score and time only if pass
         if (survivedTime && recordId != -1) {
             StatusManager.updateGameStatusToFinish(recordId, finalScore, playTime);
             long userId = UserSession.getUserId(this);
@@ -267,14 +268,14 @@ public class Game6Activity extends AppCompatActivity {
             Log.d("Game6Activity", "未通關，分數不儲存。score=" + finalScore + ", time=" + playTime);
         }
 
-        // 顯示結束畫面
+        // Display the game end message
         if (survivedTime) {
             endMessage.setText(getString(R.string.end_success_g6) + "\n" +
                     getString(R.string.score_text, finalScore));
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(v -> {
-                // startActivity(new Intent(Game6Activity.this, Game7Activity.class));
-                // finish();
+                //startActivity(new Intent(Game6Activity.this, Game7Activity.class));
+                //finish();
             });
         } else {
             endMessage.setText(getString(R.string.end_fail) + "\n" +

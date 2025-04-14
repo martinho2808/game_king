@@ -42,6 +42,13 @@ public class LeaderboardActivity extends AppCompatActivity {
         loadLeaderboard();
         loadCurrentPlayerRecord();
 
+        Button detailButton = findViewById(R.id.btn_details);
+        detailButton.setOnClickListener(v -> {
+            long userId = UserSession.getUserId(this);
+            Intent intent = new Intent(LeaderboardActivity.this, PlayerDetailActivity.class);
+            intent.putExtra("userId", (int) userId);
+            startActivity(intent);
+        });
     }
 
     private void logAllGameStatus() {

@@ -65,7 +65,7 @@ public class PlayerDetailActivity extends AppCompatActivity {
                 @SuppressLint("Range") int score = cursor.getInt(cursor.getColumnIndex("score"));
                 @SuppressLint("Range") int time = cursor.getInt(cursor.getColumnIndex("play_time"));
 
-                // 找出 gameId 在陣列中的位置
+                // Find the position of gameId in the array
                 for (int i = 0; i < gameIds.length; i++) {
                     if (gameIds[i] == gameId) {
                         HashMap<String, String> map = data.get(i);

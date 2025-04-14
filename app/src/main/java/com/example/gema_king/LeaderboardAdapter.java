@@ -47,7 +47,7 @@ public class LeaderboardAdapter extends BaseAdapter {
         ViewHolder holder;
 
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.item_leaderboard, parent, false); // ← 修正這裡
+            convertView = LayoutInflater.from(context).inflate(R.layout.item_leaderboard, parent, false);
             holder = new ViewHolder();
             holder.rankText = convertView.findViewById(R.id.rank_text);
             holder.usernameText = convertView.findViewById(R.id.username_text);
