@@ -1,5 +1,8 @@
 package com.example.gema_king;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.Image;
@@ -8,21 +11,37 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Game7Activity extends AppCompatActivity implements View.OnClickListener{
+import com.example.gema_king.model.StatusManager;
+import com.example.gema_king.model.UserSession;
 
-    private static final String TAG = "GameActivity";
+import com.example.gema_king.Game2View.PuzzleView;
+
+public class Game7Activity extends MenuActivity implements View.OnClickListener{
+
+    private static final String TAG = "Game7Activity";
 
     private ImageView cryingGirl, happyGirl, bone, goodDog, badDog, bucket, shovel;
 
     private View parentView;
+
+    private TextView endMessage;
+    private Button endActionButton;
+    private Button btnStartGame;
+    private View startOverlay;
+    private View endOverlay;
+    private final int gameId = 70;
+    private int recordId;
 
     private float dX, dY;
     private int lastAction;
@@ -30,15 +49,35 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
     private boolean shovelIsColliding;
     private boolean boneIsColliding;
 
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            Log.d(TAG, "setupToolbar: " +getSupportActionBar());
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game7);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        setupToolbar();
+
+        UserSession.getUserId(this);
+        StatusManager.init(this);
+        recordId =  StatusManager.initGameStatus(UserSession.getUserId(this),gameId);
+        StatusManager.updateGamePlayed(UserSession.getUserId(this));
+
+        btnStartGame = findViewById(R.id.btn_start_game);
+        startOverlay = findViewById(R.id.start_overlay);
+        endOverlay = findViewById(R.id.end_overlay);
+        endMessage = findViewById(R.id.end_message);
+        endActionButton = findViewById(R.id.end_action_button);
+
+        btnStartGame.setOnClickListener(v -> {
+            startOverlay.setVisibility(View.GONE);
         });
 
         cryingGirl = findViewById(R.id.cryingGirl);
@@ -54,6 +93,7 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onResume() {
         super.onResume();
+        setupToolbar();
 
 //      State the view image
         shovel.setVisibility(View.INVISIBLE);
@@ -75,6 +115,10 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
                 bone.setOnTouchListener(createDragListener(parentWidth, parentHeight));
             }
         });
+    }
+
+    private void startGame() {
+        StatusManager.updateGameStatusToProgress(recordId);
     }
 
     @Override
@@ -110,6 +154,7 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
                             cryingGirl.setVisibility(View.INVISIBLE);
                             happyGirl.setVisibility(View.VISIBLE);
                             bone.setVisibility(View.INVISIBLE);
+                            onGameCompleted(100);
                         }
                         break;
 
@@ -140,7 +185,6 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
             }
         };
     }
-
     private boolean isCollision(View view1, View view2) {
         Rect rect1 = new Rect();
         view1.getHitRect(rect1);
@@ -149,5 +193,18 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
         view2.getHitRect(rect2);
 
         return Rect.intersects(rect1, rect2);
+    }
+
+    public void onGameCompleted(int score) {
+        StatusManager.updateGameStatusToFinish(recordId, 100,0);
+        String scoreText = getString(R.string.game2_score);
+        endMessage.setText(getString(R.string.end_success_g5) + "\n" + scoreText + score);
+        endActionButton.setText(getString(R.string.next_stage));
+        endActionButton.setOnClickListener(view -> {
+            Intent intent = new Intent(Game7Activity.this, Game8Activity.class);
+            startActivity(intent);
+            finish();
+        });
+        endOverlay.setVisibility(View.VISIBLE);
     }
 }

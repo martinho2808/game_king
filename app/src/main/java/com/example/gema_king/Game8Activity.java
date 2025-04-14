@@ -1,47 +1,77 @@
 package com.example.gema_king;
 
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class Game8Activity extends AppCompatActivity {
+import com.example.gema_king.model.StatusManager;
+import com.example.gema_king.model.UserSession;
 
+public class Game8Activity extends MenuActivity {
 
+    private TextView endMessage;
+    private Button endActionButton;
+    private Button btnStartGame;
+    private View startOverlay;
+    private View endOverlay;
+    private final int gameId = 80;
+    private int recordId;
     private static final String TAG = "Game8Activity";
 
     private ImageView cryingGirl, happyGirl, scissor, television, tragic;
-
     RadioButton tvbtn;
-
     private View parentView;
 
     private float dX, dY;
     private int lastAction;
-
     private boolean shovelIsColliding;
     private boolean boneIsColliding;
+
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            Log.d(TAG, "setupToolbar: " +getSupportActionBar());
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_game8);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        setupToolbar();
+
+        UserSession.getUserId(this);
+        StatusManager.init(this);
+        recordId =  StatusManager.initGameStatus(UserSession.getUserId(this),gameId);
+        StatusManager.updateGamePlayed(UserSession.getUserId(this));
+
+        btnStartGame = findViewById(R.id.btn_start_game);
+        startOverlay = findViewById(R.id.start_overlay);
+        endOverlay = findViewById(R.id.end_overlay);
+        endMessage = findViewById(R.id.end_message);
+        endActionButton = findViewById(R.id.end_action_button);
+
+        btnStartGame.setOnClickListener(v -> {
+            startOverlay.setVisibility(View.GONE);
         });
 
         cryingGirl = findViewById(R.id.cryingGirl);
@@ -69,6 +99,7 @@ public class Game8Activity extends AppCompatActivity {
             tragic.setVisibility(View.INVISIBLE);
             happyGirl.setVisibility(View.VISIBLE);
             cryingGirl.setVisibility(View.INVISIBLE);
+            onGameCompleted(100);
         });
 
         parentView = (View) scissor.getParent();
@@ -121,4 +152,16 @@ public class Game8Activity extends AppCompatActivity {
         };
     }
 
+    public void onGameCompleted(int score) {
+        StatusManager.updateGameStatusToFinish(recordId, 100,0);
+        String scoreText = getString(R.string.game2_score);
+        endMessage.setText(getString(R.string.end_success_g5) + "\n" + scoreText + score);
+        endActionButton.setText(getString(R.string.next_stage));
+        endActionButton.setOnClickListener(view -> {
+            Intent intent = new Intent(Game8Activity.this, Game9Activity.class);
+            startActivity(intent);
+            finish();
+        });
+        endOverlay.setVisibility(View.VISIBLE);
+    }
 }
