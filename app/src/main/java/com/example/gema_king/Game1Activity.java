@@ -37,7 +37,7 @@ public class Game1Activity extends MenuActivity {
     private ArrayList<Integer> buttonIds = new ArrayList<>(); // The ID for the save button
     private ArrayList<Integer> selectedColorPattern;
     private ArrayList<View> buttons; // Store color button.
-    private final int totalColors = 2; // Total color count
+    private final int totalColors = 6; // Total color count
     private static final String TAG = "Game1Activity";
     private final int gameId = 10;
     private int recordId;

@@ -62,6 +62,7 @@ public class StatusManager {
         dbHelper.updateStatusById(recordId, game_finished, updateScore, updatePlayTime);
 
     }
+
     public static void updateGamePlayed(int userId){
         dbHelper.updateGamePlayedByUserId(userId);
     }

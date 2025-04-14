@@ -34,23 +34,23 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Game3Activity extends MenuActivity {
-    public boolean flagging = false;//是否标记
+    public boolean flagging = false;
     public boolean isGameOver = false;
     private GridLayout MineField;
     private TextView txtMineCount;
     private Button openbtn, flagbtn;
     private String time = "00:00:00";
     private TextView txtTimer;
-    private String Level = "Easy";//游戏难度
+    private String Level = "Easy";
     private Handler timer = new Handler();
     private int Seconds = 0;
     public boolean isTimerStarted = false;
     public int numberOfRowsInMineField = 6;
     public int numberOfColumnsInMineField = 6;
     public int totalNumberOfMines = 5;
-    private int Mines = 5;//初始雷数
-    private int Opened = 0;//目前已翻开个数
-    private int Flagged = 0;//目前被标记个数
+    private int Mines = 5;//Initial Mines
+    private int Opened = 0;//The number of opened
+    private int Flagged = 0;//The current number of marked
     private View startOverlay;
     private View endOverlay;
     private TextView endMessage;
@@ -96,12 +96,13 @@ public class Game3Activity extends MenuActivity {
     }
 
     @Override
-    //接收菜单界面传回的参数进行处理
+    //Receive the parameters returned by the menu interface for processing
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //点击新游戏按钮进行初始化
+        //Click the button to initialize
         if (resultCode == 1) {
             if (data.getStringExtra("result").equals("newgame")) {
+                StatusManager.updateGameStatusToProgress(recordId);
                 init();
             }
             //恢复暂停的计时器
@@ -113,14 +114,7 @@ public class Game3Activity extends MenuActivity {
         }
     }
 
-    //调用菜单界面
-    public void Menu(View view) {
-        Intent menu = new Intent(Game3Activity.this, MainMenuActivity.class);
-        startActivityForResult(menu, 1);
-        stopTimer();//点击菜单按钮暂停计时器
-    }
-
-    //游戏初始化
+    //Game initialize
     public void init() {
         MineField.removeAllViews();
         Seconds = 0;
@@ -134,7 +128,7 @@ public class Game3Activity extends MenuActivity {
         stopTimer();
         txtMineCount.setText(Integer.toString(totalNumberOfMines));
         txtTimer.setText(time);
-        openbtn.setEnabled(false);//初始将翻开按钮置为不可点击
+        openbtn.setEnabled(false);
         flagbtn.setEnabled(true);
         openbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,7 +150,7 @@ public class Game3Activity extends MenuActivity {
         showMineField();
     }
 
-    //创建雷区
+    //Creating a minefield
     private void createMineField() {
         blocks = new Block[numberOfRowsInMineField][numberOfColumnsInMineField];
         for (int row = 0; row < numberOfRowsInMineField; row++) {
@@ -169,29 +163,29 @@ public class Game3Activity extends MenuActivity {
                 blocks[row][column].setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //若计时器未启动，启动计时器
+                        //If the timer is not started, start the timer
                         if (!isTimerStarted) {
                             startTimer();
                             isTimerStarted = true;
                         }
-                        //翻开
+                        //Open
                         if (!flagging) {
                             if (!temp.isFlagged()) {
-                                // 翻开自己及周围的雷块
+                                //Open the minefields around you and yourself
                                 rippleUncover(currentRow, currentColumn);
-                                //若触雷则游戏结束
+                                //If you hit a mine, the game ends
                                 if (temp.hasMine()) {
                                     finishGame();
                                 }
                             }
                         }
-                        //标记
+                        //Tag
                         else {
                             if (temp.isCovered()) {
                                 if (temp.isFlagged()) {
                                     blocks[currentRow][currentColumn].clearAllIcons();
                                     blocks[currentRow][currentColumn].setFlagged(false);
-                                    UpdateMinecount(true);//更新计数器
+                                    UpdateMinecount(true);
                                 } else {
                                     blocks[currentRow][currentColumn].setFlagIcon(false);
                                     blocks[currentRow][currentColumn].setFlagged(true);
@@ -199,7 +193,6 @@ public class Game3Activity extends MenuActivity {
                                 }
                             }
                         }
-                        // 检查是否获胜
                         if (checkGameWin()) {
                             winGame();
                         }
@@ -212,14 +205,13 @@ public class Game3Activity extends MenuActivity {
         setMines();
     }
 
-    //游戏获胜
+    //Win the game
     @SuppressLint("SetTextI18n")
     private void winGame() {
         stopTimer();
         isTimerStarted = false;
         isGameOver = true;
         Mines = 0;
-        //将所有雷块置为不可点击，标记所有的地雷
         for (int row = 0; row < numberOfRowsInMineField; row++) {
             for (int column = 0; column < numberOfColumnsInMineField; column++) {
                 blocks[row][column].setEnabled(false);
@@ -228,13 +220,13 @@ public class Game3Activity extends MenuActivity {
                 }
             }
         }
-        GameRecord(1);//进行记录
+        int score = calculateScore();
+        StatusManager.updateGameStatusToFinish(recordId, score, Seconds);
         runOnUiThread(() -> {
-            //startOverlay.setVisibility(View.VISIBLE);
             String secondText = getString(R.string.game3_second);
             String timeTakeText = getString(R.string.game3_time_take);
             String scoreText = getString(R.string.game3_score);
-            endMessage.setText(getString(R.string.end_success_g5) + "\n" + timeTakeText + time);
+            endMessage.setText(getString(R.string.end_success_g5) + "\n" + timeTakeText + Seconds + secondText + "\n" + scoreText + score);
             endActionButton.setText(getString(R.string.next_stage));
             endActionButton.setOnClickListener(view -> {
                 Intent intent = new Intent(Game3Activity.this, Game4Activity.class);
@@ -245,12 +237,18 @@ public class Game3Activity extends MenuActivity {
         });
     }
 
-    //游戏失败
+    private int calculateScore() {
+        int baseScore = 200;
+        int timePenalty = Seconds - 1; //1 points deducted per second
+        int score = Math.max(0, baseScore - timePenalty);
+        return score;
+    }
+
+    //Loss the game
     private void finishGame() {
         stopTimer();
         isGameOver = true;
         isTimerStarted = false;
-        //将所有雷块置为不可点击，翻开所有雷块
         for (int row = 0; row < numberOfRowsInMineField; row++) {
             for (int column = 0; column < numberOfColumnsInMineField; column++) {
                 blocks[row][column].setEnabled(false);
@@ -264,9 +262,8 @@ public class Game3Activity extends MenuActivity {
                 }
             }
         }
-        GameRecord(0);//进行记录
+
         runOnUiThread(() -> {
-            //startOverlay.setVisibility(View.VISIBLE);
             endMessage.setText(getString(R.string.game3_retry));
             endActionButton.setText(getString(R.string.retry));
             endActionButton.setOnClickListener(v -> {
@@ -277,74 +274,7 @@ public class Game3Activity extends MenuActivity {
         });
     }
 
-    //游戏结果存档
-    public void GameRecord(int t) {
-        String state;
-        String filename = getExternalCacheDir().getAbsolutePath() + "/gamerecord.txt";//记录文件的路径
-        FileOutputStream fos;
-        FileInputStream fis;
-        PrintWriter pw = null;
-        BufferedReader br = null;
-        if (t == 1) state = "Win  ";
-        else state = "Lose";
-        //若目录路径不存在，建立目录
-        File file = new File(getExternalCacheDir().getAbsolutePath());
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        try {
-            File dir = new File(filename);
-            if (!dir.exists()) dir.createNewFile();//若记录文件不存在创建文件
-                //若记录文件存在，检查记录是否为5条，若达到5条则删去最早记录
-            else {
-                LineNumberReader lnr = new LineNumberReader(new FileReader(filename));
-                lnr.skip(Long.MAX_VALUE);
-                int i = lnr.getLineNumber();//获取行数，即记录数
-                lnr.close();
-                //将除最早记录之外的其他记录存入list中再写回
-                if (i >= 5) {
-                    fis = new FileInputStream(filename);
-                    br = new BufferedReader(new InputStreamReader(fis));
-                    i = 0;
-                    String str = null;
-                    ArrayList<String> list = new ArrayList<String>();
-                    while ((str = br.readLine()) != null) {
-                        if (i == 0) {
-                            i++; continue;
-                        }
-                        i++;
-                        list.add(str);
-                    }
-                    BufferedWriter bw = new BufferedWriter(new FileWriter(filename));
-                    for (String a : list) {
-                        bw.write(a);
-                        bw.newLine();
-                    }
-                    bw.close();
-                    fis.close();
-                }
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //写入新记录
-        try {
-            fos = new FileOutputStream(filename, true);
-            pw = new PrintWriter(fos);
-            pw.println(Level + "       " + state + "       " + time);
-            pw.flush();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            pw.close();
-        }
-    }
-
-    //更新地雷计数器
+    //Updated mine counter
     public void UpdateMinecount(boolean flag) {
         if (flag) {
             Flagged--;
@@ -361,11 +291,10 @@ public class Game3Activity extends MenuActivity {
         }
     }
 
-    //启动计时器
+    //Start Timer
     public void startTimer() {
         if (Seconds == 0) {
             timer.removeCallbacks(updateTimeElasped);
-            // 让计时器每隔1s更新界面
             timer.postDelayed(updateTimeElasped, 1000);
         } else {
             timer.postDelayed(updateTimeElasped, 1000);
@@ -373,11 +302,10 @@ public class Game3Activity extends MenuActivity {
     }
 
     public void stopTimer() {
-        // 停止计时器
         timer.removeCallbacks(updateTimeElasped);
     }
 
-    //计时器子线程
+    //Timer child thread
     private Runnable updateTimeElasped = new Runnable() {
         public void run() {
             ++Seconds;
@@ -390,28 +318,27 @@ public class Game3Activity extends MenuActivity {
         }
     };
 
-    //显示雷区
+    //Show MineField
     private void showMineField() {
         for (int i = 0; i < numberOfRowsInMineField; i++) {
             for (int j = 0; j < numberOfColumnsInMineField; j++) {
-                GridLayout.Spec rowSpec = GridLayout.spec(i); // 设置btn的行
-                GridLayout.Spec columnSpec = GridLayout.spec(j);// 设置btn的列
+                GridLayout.Spec rowSpec = GridLayout.spec(i); // Setup the row of btn
+                GridLayout.Spec columnSpec = GridLayout.spec(j);// Setup the column of btn
                 GridLayout.LayoutParams params = new GridLayout.LayoutParams(rowSpec, columnSpec);
-                Resources resources = this.getResources();//获取系统资源
-                DisplayMetrics dm = resources.getDisplayMetrics();//获取屏幕密度
-                int t = dm.widthPixels / (numberOfColumnsInMineField + 1);//根据屏幕宽度设置雷块宽度
+                Resources resources = this.getResources();
+                DisplayMetrics dm = resources.getDisplayMetrics();
+                int t = dm.widthPixels / (numberOfColumnsInMineField + 1);
                 params.width = t;
                 params.height = t;
-                //根据雷块数量调整宽度和间距
                 if (Level.equals("Easy")) {
                     params.setMargins(13, 13, 13, 13);
                 }
-                MineField.addView(blocks[i][j], params);//单元格加入网格布局
+                MineField.addView(blocks[i][j], params);
             }
         }
     }
 
-    //布雷并计算每个方块周围雷数
+    //Lay mines and count the number of mines around each square
     private void setMines() {
         Random random = new Random();
         for (int i = 0; i < totalNumberOfMines; i++) {
@@ -423,7 +350,7 @@ public class Game3Activity extends MenuActivity {
                 }
             }
         }
-        //计算每个无雷方块周围雷数
+        //Calculate the number of mines around each mine-free block
         for (int i = 0; i < numberOfRowsInMineField; i++) {
             for (int j = 0; j < numberOfColumnsInMineField; j++) {
                 if (blocks[i][j].hasMine())
@@ -453,26 +380,22 @@ public class Game3Activity extends MenuActivity {
         return mineCount;
     }
 
-    //翻开自己及周围方块
+    //Turn over your own and surrounding blocks
     private void rippleUncover(int rowClicked, int columnClicked) {
-        // 若方块有雷或被标记则不翻开
         if (blocks[rowClicked][columnClicked].hasMine() || blocks[rowClicked][columnClicked].isFlagged())
             return;
 
-        //翻开方块
         blocks[rowClicked][columnClicked].OpenBlock();
         Opened++;
-        //若待翻开的方块周围有雷则不再翻开其周围
         if (blocks[rowClicked][columnClicked].getNumberOfMinesInSorrounding() != 0) {
             return;
         }
-        // 翻开周围八个方块
         for (int i = (rowClicked - 1); i <= (rowClicked + 1); i++) {
             for (int j = (columnClicked - 1); j <= (columnClicked + 1); j++) {
                 try {
                     if (i == rowClicked && j == columnClicked) continue;
                     if (!blocks[i][j].isCovered()) continue;
-                    rippleUncover(i, j);//递归处理周围方块
+                    rippleUncover(i, j);
                 } catch (ArrayIndexOutOfBoundsException e) {
                     continue;
                 }
@@ -481,10 +404,9 @@ public class Game3Activity extends MenuActivity {
         return;
     }
 
-    //判断游戏是否胜利
+    //Check whether the game is won
     private boolean checkGameWin() {
         if (isGameOver) return false;
-        //标记数和翻开数之和等于方块总数，并且标记数等于雷数则游戏胜利
         if (Flagged + Opened == numberOfColumnsInMineField * numberOfRowsInMineField
                 && totalNumberOfMines == Flagged) {
             return true;
