@@ -18,9 +18,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class Game7Activity extends AppCompatActivity implements View.OnClickListener{
 
-    private static final String TAG = "Game7Activity";
+    private static final String TAG = "GameActivity";
 
-    private ImageView cryingGirl, happyGirl, television, tragic, scissor;
+    private ImageView cryingGirl, happyGirl, bone, goodDog, badDog, bucket, shovel;
 
     private View parentView;
 
@@ -34,7 +34,7 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_game8);
+        setContentView(R.layout.activity_game7);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -44,9 +44,11 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
         cryingGirl = findViewById(R.id.cryingGirl);
         happyGirl = findViewById(R.id.happyGirl);
 
-        television = findViewById(R.id.television);
-        tragic = findViewById(R.id.tragic);
-        scissor = findViewById(R.id.scissor);
+        bone = findViewById(R.id.bone);
+        goodDog = findViewById(R.id.goodDog);
+        badDog = findViewById(R.id.badDog);
+        bucket = findViewById(R.id.bucket);
+        shovel = findViewById(R.id.shovel);
     }
 
     @Override
@@ -54,11 +56,14 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
         super.onResume();
 
 //      State the view image
-        television.setVisibility(View.INVISIBLE);
+        shovel.setVisibility(View.INVISIBLE);
+        bone.setVisibility(View.INVISIBLE);
+        badDog.setVisibility(View.VISIBLE);
+        goodDog.setVisibility(View.INVISIBLE);
 
-        tragic.setOnClickListener(this);
+        bucket.setOnClickListener(this);
 
-        parentView = (View) scissor.getParent();
+        parentView = (View) shovel.getParent();
         parentView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -66,7 +71,8 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
                 int parentWidth = parentView.getWidth();
                 int parentHeight = parentView.getHeight();
 
-                scissor.setOnTouchListener(createDragListener(parentWidth, parentHeight));
+                shovel.setOnTouchListener(createDragListener(parentWidth, parentHeight));
+                bone.setOnTouchListener(createDragListener(parentWidth, parentHeight));
             }
         });
     }
@@ -74,9 +80,9 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         Log.i(TAG, "Start clicking");
-        if (v.getId() == tragic.getId()) {
-            tragic.setVisibility(View.INVISIBLE);
-            television.setVisibility(View.VISIBLE);
+        if (v.getId() == bucket.getId()) {
+            shovel.setVisibility(View.VISIBLE);
+            shovel.setClickable(true);
         }
     }
     private View.OnTouchListener createDragListener(final int parentWidth, final int parentHeight) {
@@ -91,6 +97,20 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
                         Log.i(TAG, "Action down");
                         dX = view.getX() - event.getRawX();
                         dY = view.getY() - event.getRawY();
+
+                        if(shovelIsColliding) {
+                            Log.i(TAG, "changing the visibility of bone");
+                            bone.setVisibility(View.VISIBLE);
+                        }
+
+                        if(boneIsColliding) {
+                            Log.i(TAG, "changing dog");
+                            badDog.setVisibility(View.INVISIBLE);
+                            goodDog.setVisibility(View.VISIBLE);
+                            cryingGirl.setVisibility(View.INVISIBLE);
+                            happyGirl.setVisibility(View.VISIBLE);
+                            bone.setVisibility(View.INVISIBLE);
+                        }
                         break;
 
                     case MotionEvent.ACTION_MOVE:
@@ -107,6 +127,11 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
 
                         view.setX(newX);
                         view.setY(newY);
+
+                        // Check collision
+                        shovelIsColliding = isCollision(view, bone);
+                        boneIsColliding = isCollision(view, badDog);
+                        Log.i(TAG, "Collide: " + shovelIsColliding);
                         break;
                     default:
                         return false;
@@ -114,5 +139,15 @@ public class Game7Activity extends AppCompatActivity implements View.OnClickList
                 return true;
             }
         };
+    }
+
+    private boolean isCollision(View view1, View view2) {
+        Rect rect1 = new Rect();
+        view1.getHitRect(rect1);
+
+        Rect rect2 = new Rect();
+        view2.getHitRect(rect2);
+
+        return Rect.intersects(rect1, rect2);
     }
 }
