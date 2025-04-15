@@ -115,7 +115,7 @@ public class Game6Activity extends AppCompatActivity {
         public void onSensorChanged(SensorEvent event) {
             if (!isRunning) return;
             float x = event.values[0];
-            float moveX = x * 10f;
+            float moveX = -x * 10f;
             float newX = player.getX() + moveX;
             newX = Math.max(0, Math.min(newX, gameLayer.getWidth() - player.getWidth()));
             player.setX(newX);

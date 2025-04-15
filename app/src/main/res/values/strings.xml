@@ -93,6 +93,12 @@
 
     <!-- 新增遊戲相關字符串 -->
     <string name="player_name">玩家名稱</string>
+    <string name="error_empty_fields">請填寫所有欄位</string>
+    <string name="error_password_mismatch">密碼不一致</string>
+    <string name="error_invalid_age">請輸入有效的年齡</string>
+    <string name="error_invalid_email">請輸入有效的電子郵件</string>
+    <string name="error_username_exists">用戶名已存在</string>
+    <string name="error_login_failed">用戶名或密碼無效</string>
 
     <!-- 遊戲進度相關 -->
     <string name="total_play_time_format">%d 小時 %d 分鐘</string>
