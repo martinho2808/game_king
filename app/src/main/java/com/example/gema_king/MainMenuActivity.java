@@ -200,6 +200,9 @@ public class MainMenuActivity extends MenuActivity {
             
             // 清除用戶會話
             UserSession.getInstance().clearUserSession(this);
+
+            // 顯示登出成功提示
+            Toast.makeText(this, getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
             
             // 切換回主畫面背景音樂
             soundManager.switchBGM(R.raw.bgm_main);

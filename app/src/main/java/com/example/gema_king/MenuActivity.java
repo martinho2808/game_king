@@ -227,7 +227,6 @@ public class MenuActivity extends AppCompatActivity {
 
             dialog.dismiss();
         });
-
         dialog.show();
     }
     private void updateButtonTextColor(Button button, boolean isSelected) {

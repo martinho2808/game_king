@@ -48,7 +48,7 @@ import java.util.Locale;
 public class Game9Activity extends MenuActivity {
     private static final String TAG = "Game9Activity";
     private static final int GAME_ID = 90;
-    private static final int QUESTIONS_PER_GAME = 15;
+    private static final int QUESTIONS_PER_GAME = 10;
     private static final long QUESTION_TIME_LIMIT = 15000; // 15 seconds
     private static final int BASE_SCORE = 100;
     private static final String PREF_NAME = "GameKing";
