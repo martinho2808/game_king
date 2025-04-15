@@ -128,7 +128,6 @@ public class Game6Activity extends AppCompatActivity {
     private void startGame() {
         long userId = UserSession.getUserId(this);
         recordId = StatusManager.initGameStatus((int) userId, GAME_ID);
-        StatusManager.updateGamePlayed(UserSession.getUserId(this));
         StatusManager.updateGameStatusToProgress(recordId);
         isRunning = true;
         playerHealth = 5;
@@ -157,9 +156,9 @@ public class Game6Activity extends AppCompatActivity {
                 endGame(true);
             } else {
                 score++;
-                if (elapsed % 5000 < 100) {
-                    score += 10;
-                }
+                //if (elapsed % 5000 < 100) {
+                //score += 10;
+                //}
                 updateScore();
                 runTimer();
             }
@@ -229,7 +228,7 @@ public class Game6Activity extends AppCompatActivity {
 
                     int damage = (speed == 5 || speed == 6) ? 2 : 1;
                     playerHealth -= damage;
-                    score = Math.max(0, score - damage * 10);
+                    score = Math.max(0, score - damage * 50);
 
                     updateHealth();
                     updateScore();

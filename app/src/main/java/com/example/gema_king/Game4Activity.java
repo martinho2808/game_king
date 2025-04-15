@@ -164,7 +164,7 @@ public class Game4Activity extends MenuActivity {
                 StatusManager.updateGameStatusToFinish(recordId, score, playTime);
 
                 runOnUiThread(() -> {
-                    StatusManager.updateGameStatusToFinish(recordId, score, 0);
+                    //StatusManager.updateGameStatusToFinish(recordId, score, 0);
                     String scoreText = getString(R.string.game4_score);
                     endMessage.setText(getString(R.string.end_success_g5) + "\n" + scoreText + score);
                     endActionButton.setText(getString(R.string.next_stage));

@@ -40,10 +40,8 @@ public class PlayerDetailActivity extends AppCompatActivity {
     private void loadPlayerGameDetails(int userId) {
         List<HashMap<String, String>> data = new ArrayList<>();
 
-        // 對應顯示名稱：Game 1 ~ Game 10
         int[] gameIds = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
 
-        // 初始化每個遊戲為 -
         for (int i = 0; i < gameIds.length; i++) {
             HashMap<String, String> map = new HashMap<>();
             map.put("game", getString(R.string.signal_game_id, i + 1));
@@ -52,7 +50,6 @@ public class PlayerDetailActivity extends AppCompatActivity {
             data.add(map);
         }
 
-        // 查詢資料庫紀錄
         Log.d("PlayerDetail", "開始查詢 userId=" + userId);
 
         String query = "SELECT game_id, score, play_time FROM game_status WHERE user_id = ?";
