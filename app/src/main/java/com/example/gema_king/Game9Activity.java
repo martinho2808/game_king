@@ -48,7 +48,7 @@ import java.util.Locale;
 public class Game9Activity extends MenuActivity {
     private static final String TAG = "Game9Activity";
     private static final int GAME_ID = 90;
-    private static final int QUESTIONS_PER_GAME = 10;
+    private static final int QUESTIONS_PER_GAME = 15;
     private static final long QUESTION_TIME_LIMIT = 15000; // 15 seconds
     private static final int BASE_SCORE = 100;
     private static final String PREF_NAME = "GameKing";
@@ -416,7 +416,7 @@ public class Game9Activity extends MenuActivity {
         // 計算總遊戲時間（秒）
         int totalPlayTime = (int) ((System.currentTimeMillis() - gameStartTime) / 1000);
 
-        // 直接更新遊戲狀態和記錄
+        // 更新遊戲狀態和記錄
         StatusManager.updateGameStatusToFinish(recordId, score, totalPlayTime);
 
         endMessage.setText(getString(R.string.game9_end_message, score, (correctAnswers * 100 / QUESTIONS_PER_GAME)));
@@ -441,7 +441,6 @@ public class Game9Activity extends MenuActivity {
             
             // 啟動 Game10Activity
             startActivity(intent);
-            //finish();
         });
     }
     

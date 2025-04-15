@@ -83,13 +83,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 設置音樂狀態
         soundManager.setBGMEnabled(isBGMEnabled);
         
-        // 延遲啟動音樂，確保活動完全創建
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (isBGMEnabled && !isFinishing()) {
-                soundManager.switchBGM(R.raw.bgm_main);
-                soundManager.startBGM();
-            }
-        }, 300);
+        // 檢查用戶會話
+        checkUserSession();
+        
+        // 如果沒有背景音樂在播放，則播放主畫面音樂
+        if (isBGMEnabled && !soundManager.isBGMPlaying()) {
+            soundManager.switchBGM(R.raw.bgm_main);
+            soundManager.startBGM();  // 確保音樂開始播放
+        }
 
         setContentView(R.layout.activity_main);
 
@@ -118,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setupClickListeners();
         // 更新UI語言
         updateUILanguage();
-        checkUserSession();
     }
 
     private void initializeViews() {
@@ -160,24 +160,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             getMenuInflater().inflate(R.menu.main_menu, menu);
         }
         return true;
-    }
-
-    // 當用戶登入成功後調用
-    public void onUserLoggedIn() {
-        isUserLoggedIn = true;
-        invalidateOptionsMenu(); // 刷新選單顯示
-        // 隱藏登入和註冊按鈕
-        loginBtnSignup.setVisibility(View.GONE);
-        loginBtnLogin.setVisibility(View.GONE);
-    }
-
-    // 當用戶登出後調用
-    public void onUserLoggedOut() {
-        isUserLoggedIn = false;
-        invalidateOptionsMenu(); // 刷新選單隱藏
-        // 顯示登入和註冊按鈕
-        loginBtnSignup.setVisibility(View.VISIBLE);
-        loginBtnLogin.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -355,10 +337,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String.format(getString(R.string.welcome_back), username), 
                     Toast.LENGTH_LONG).show();
                 
-                // 不要停止音樂，只需切換
-                if (soundManager != null) {
-                    soundManager.switchBGM(R.raw.bgm_menu);
-                }
                 // 導航到主選單
                 Intent intent = new Intent(this, MainMenuActivity.class);
                 startActivity(intent);

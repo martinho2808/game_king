@@ -34,13 +34,8 @@ public class MenuActivity extends AppCompatActivity {
     private static final String PREF_NAME = "GameKing";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         soundManager = SoundManager.getInstance(this);
-        soundManager.switchBGM(R.raw.bgm_menu);
-        soundManager.startBGM();
-
         super.onCreate(savedInstanceState);
-
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

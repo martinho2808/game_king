@@ -43,25 +43,15 @@ public class MainMenuActivity extends MenuActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        soundManager = SoundManager.getInstance(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_menu);
 
+        // 初始化音效管理器
+        soundManager = SoundManager.getInstance(this);
+        
         // 初始化數據庫
         dbHelper = new DatabaseHelper(this);
         
-        // 確保背景音樂正在播放
-        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
-        
-        if (isBGMEnabled) {
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (!soundManager.isBGMPlaying() || soundManager.getCurrentBGM() != R.raw.bgm_menu) {
-                    soundManager.switchBGM(R.raw.bgm_menu);
-                }
-            }, 300);
-        }
-
         // 初始化視圖
         initViews();
         setupToolbar();
@@ -71,6 +61,17 @@ public class MainMenuActivity extends MenuActivity {
         
         // 設置按鈕點擊事件
         setupClickListeners();
+
+        // 使用 Handler 延遲播放背景音樂，確保界面完全初始化
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+            boolean isBGMEnabled = prefs.getBoolean("isBGMEnabled", true);
+            
+            if (isBGMEnabled && soundManager.getCurrentBGM() != R.raw.bgm_menu) {
+                // 直接切換到主選單音樂
+                soundManager.switchBGM(R.raw.bgm_menu);
+            }
+        }, 500); // 延遲 500 毫秒
     }
 
     private void initViews() {
@@ -193,6 +194,23 @@ public class MainMenuActivity extends MenuActivity {
         if (id == R.id.action_leaderboard) {
             startActivity(new Intent(this, LeaderboardActivity.class));
             return true;
+        } else if (id == R.id.action_logout) {
+            // 播放按鈕音效
+            soundManager.playButtonClick();
+            
+            // 清除用戶會話
+            UserSession.getInstance().clearUserSession(this);
+            
+            // 切換回主畫面背景音樂
+            soundManager.switchBGM(R.raw.bgm_main);
+            soundManager.startBGM();  // 確保音樂開始播放
+            
+            // 返回主畫面
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -200,9 +218,11 @@ public class MainMenuActivity extends MenuActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // 檢查並切換背景音樂
-        if (SoundManager.getInstance(this).getCurrentBGM() != R.raw.bgm_main) {
-            SoundManager.getInstance(this).switchBGM(R.raw.bgm_main);
+        // 只在需要時切換背景音樂，並且確保不會重複切換
+        if (soundManager.getCurrentBGM() != R.raw.bgm_menu && soundManager.isBGMEnabled() && !isFinishing()) {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                soundManager.switchBGM(R.raw.bgm_menu);
+            }, 500);
         }
     }
 

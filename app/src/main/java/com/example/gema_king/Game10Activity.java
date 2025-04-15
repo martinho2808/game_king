@@ -18,7 +18,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -28,6 +27,7 @@ import android.content.Intent;
 import android.content.Context;
 import android.os.Vibrator;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -35,6 +35,8 @@ import com.example.gema_king.model.StatusManager;
 import com.example.gema_king.model.UserSession;
 import com.example.gema_king.view.TiltMazeView;
 import com.google.android.material.button.MaterialButton;
+
+import org.json.JSONObject;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -186,40 +188,22 @@ public class Game10Activity extends MenuActivity {
 
         // 設置開始遊戲按鈕點擊事件
         btnStartGame.setOnClickListener(v -> {
-            Log.d(TAG, "開始遊戲按鈕被點擊");
-            soundManager.playButtonClick();
-            
-            // 防止重複點擊
-            if (isStartingGame) {
-                Log.d(TAG, "遊戲正在啟動中，忽略此次點擊");
-                return;
+            if (!isStartingGame) {
+                isStartingGame = true;
+                startOverlay.setVisibility(View.GONE);
+                gameContainer.setVisibility(View.VISIBLE);
+                
+                // 確保 TiltMazeView 已經完成初始化
+                tiltMazeView.post(() -> {
+                    startGame();
+                });
             }
-            
-            isStartingGame = true;
-            
-            // 先切換視圖，再啟動遊戲
-            startOverlay.setVisibility(View.GONE);
-            gameContainer.setVisibility(View.VISIBLE);
-            
-            // 在背景線程中啟動遊戲
-            executorService.execute(() -> {
-                try {
-                    // 在主線程中啟動遊戲
-                    handler.post(() -> {
-                        startGame();
-                        isStartingGame = false;
-                    });
-                } catch (Exception e) {
-                    Log.e(TAG, "啟動遊戲時發生錯誤", e);
-                    isStartingGame = false;
-                }
-            });
         });
         
         // 設置下一關按鈕點擊事件
         btnNextGame.setOnClickListener(v -> {
             soundManager.playButtonClick();
-            finish();
+            endGame();
         });
         
         // 設置再玩一次按鈕點擊事件
@@ -254,19 +238,27 @@ public class Game10Activity extends MenuActivity {
                 Log.d(TAG, "遊戲失敗，嘗試次數: " + tiltMazeView.getAttempts());
                 attemptsText.setText(getString(R.string.game10_attempts, tiltMazeView.getAttempts()));
                 soundManager.playGameSound(R.raw.wrong);
+
+                if (tiltMazeView.getAttempts() >= 10) {
+                    Toast.makeText(Game10Activity.this, R.string.game_10_game_over, Toast.LENGTH_SHORT).show();
+                    restartGame();
+                }
             }
         });
     }
 
-    private int calculateScore(long time) {
+    private int calculateScore(long playTimeSeconds) {
         // 基礎分數
         int baseScore = 1000;
         
         // 根據時間扣分（每秒扣 2 分）
-        int timePenalty = (int) time * 2;
+        int timePenalty = (int) (playTimeSeconds * 2);
+        
+        // 根據嘗試次數扣分（每次嘗試扣 50 分）
+        int attemptsPenalty = tiltMazeView.getAttempts() * 50;
         
         // 計算最終分數
-        int finalScore = baseScore - timePenalty;
+        int finalScore = baseScore - timePenalty - attemptsPenalty;
         
         // 確保分數不會小於 0
         return Math.max(0, finalScore);
@@ -274,6 +266,12 @@ public class Game10Activity extends MenuActivity {
 
     private void startGame() {
         Log.d(TAG, "開始遊戲");
+        if (isStartingGame) {
+            Log.d(TAG, "遊戲正在啟動中，忽略此次調用");
+            return;
+        }
+        
+        isStartingGame = true;
         isGameRunning = true;
         startTime = System.currentTimeMillis();
         
@@ -285,16 +283,27 @@ public class Game10Activity extends MenuActivity {
             toolbarTitle.setText(R.string.game10_title);
         }
         
-        // 重置遊戲狀態
-        tiltMazeView.startGame();
-        attemptsText.setText(getString(R.string.game10_attempts, 0));
-        timerText.setText(getString(R.string.game10_time_format, 0));
-        
-        // 開始計時
-        startTimer();
-        
-        // 更新遊戲狀態
-        StatusManager.updateGameStatusToProgress(recordId);
+        // 確保 TiltMazeView 已經完成初始化
+        if (tiltMazeView != null) {
+            tiltMazeView.post(() -> {
+                // 重置遊戲狀態
+                tiltMazeView.startGame();
+                attemptsText.setText(getString(R.string.game10_attempts, 0));
+                timerText.setText(getString(R.string.game10_time_format, 0));
+                
+                // 開始計時
+                startTimer();
+                
+                // 更新遊戲狀態
+                StatusManager.updateGameStatusToProgress(recordId);
+                
+                isStartingGame = false;
+            });
+        } else {
+            Log.e(TAG, "TiltMazeView 未初始化");
+            isStartingGame = false;
+            isGameRunning = false;
+        }
     }
 
     private void restartGame() {
@@ -303,7 +312,6 @@ public class Game10Activity extends MenuActivity {
         // 重置遊戲狀態
         isGameRunning = false;
         handler.removeCallbacksAndMessages(null);
-        StatusManager.updateGameStatusToStop(recordId);
         
         // 重置計時器和嘗試次數
         timerText.setText(getString(R.string.game10_time_format, 0));
@@ -327,6 +335,9 @@ public class Game10Activity extends MenuActivity {
         // 重置開始遊戲按鈕狀態
         isStartingGame = false;
         
+        // 更新遊戲狀態
+        StatusManager.updateGameStatusToStop(recordId);
+        
         Log.d(TAG, "遊戲重置完成");
     }
 
@@ -335,12 +346,18 @@ public class Game10Activity extends MenuActivity {
         gameContainer.setVisibility(View.GONE);
         endOverlay.setVisibility(View.VISIBLE);
         
-        // 更新結束訊息，使用本地化的字符串資源
-        String completeMessage = getString(R.string.game10_complete_message, newScore, time);
-        endMessage.setText(completeMessage);
+        // 停止計時器
+        handler.removeCallbacksAndMessages(null);
         
-        // 直接更新遊戲狀態和記錄
-        StatusManager.updateGameStatusToFinish(recordId, newScore, (int) time);
+        // 計算實際遊戲時間（秒）
+        int totalPlayTime = (int) ((System.currentTimeMillis() - startTime) / 1000);
+        
+        // 更新遊戲狀態和分數到數據庫
+        StatusManager.updateGameStatusToFinish(recordId, newScore, totalPlayTime);
+        
+        // 更新結束訊息，使用本地化的字符串資源
+        String completeMessage = getString(R.string.game10_complete_message, newScore, totalPlayTime);
+        endMessage.setText(completeMessage);
         
         // 更新再玩一次按鈕文字
         MaterialButton playAgainButton = findViewById(R.id.btn_play_again);
@@ -355,34 +372,38 @@ public class Game10Activity extends MenuActivity {
         // 更新下一關按鈕文字
         MaterialButton nextGameButton = findViewById(R.id.btn_next_game);
         if (nextGameButton != null) {
-            nextGameButton.setText(R.string.next_game);
+            nextGameButton.setText(R.string.return_to_main_menu);
             nextGameButton.setOnClickListener(v -> {
                 soundManager.playButtonClick();
-                Intent intent = new Intent(Game10Activity.this, Game11Activity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("returnToStart", true);
+                // 禁用按鈕防止重複點擊
+                nextGameButton.setEnabled(false);
+                // 切換到主選單音樂
+                soundManager.switchBGM(R.raw.bgm_menu);
+                // 直接返回主選單
+                Intent intent = new Intent(this, MainMenuActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                finish();
             });
-        }
-    }
-
-    private void showLeaderboard() {
-        // 只在開始和結束界面顯示排行榜
-        if (!isGameRunning) {
-            // 顯示排行榜邏輯
-            // ...
         }
     }
 
     private void startTimer() {
         Log.d(TAG, "開始計時器");
         handler.removeCallbacksAndMessages(null);
+        
+        // 重置開始時間
+        startTime = System.currentTimeMillis();
+        
         handler.post(timerRunnable);
     }
 
     private void updateTimerText(long elapsedTime) {
-        long seconds = (elapsedTime / 1000) % 60;
-        long minutes = (elapsedTime / (1000 * 60)) % 60;
+        // 將毫秒轉換為秒
+        long seconds = elapsedTime / 1000;
+        long minutes = seconds / 60;
+        seconds = seconds % 60;
+        
         if (minutes > 0) {
             timerText.setText(getString(R.string.game10_time_format_minutes, minutes, seconds));
         } else {
@@ -406,7 +427,8 @@ public class Game10Activity extends MenuActivity {
         Log.d(TAG, "onResume");
         super.onResume();
         if (isGameRunning) {
-            tiltMazeView.startGame();
+            // 只恢復感應器和計時器，不重新生成迷宮
+            tiltMazeView.resumeGame();  // 使用新方法代替startGame
             startTimer();
             StatusManager.updateGameStatusToProgress(recordId);
         }
@@ -512,7 +534,7 @@ public class Game10Activity extends MenuActivity {
             // 更新下一關按鈕
             MaterialButton nextGameButton = findViewById(R.id.btn_next_game);
             if (nextGameButton != null) {
-                nextGameButton.setText(R.string.next_game);
+                nextGameButton.setText(R.string.return_to_main_menu);
             }
         }
     }
@@ -713,5 +735,109 @@ public class Game10Activity extends MenuActivity {
         if (button != null) {
             button.setTextColor(isSelected ? getResources().getColor(R.color.purple_500) : getResources().getColor(R.color.white));
         }
+    }
+
+    private void endGame() {
+        Log.d(TAG, "遊戲結束");
+        isGameRunning = false;
+        
+        // 停止計時器
+        handler.removeCallbacksAndMessages(null);
+        tiltMazeView.stopGame();
+        
+        gameContainer.setVisibility(View.GONE);
+        endOverlay.setVisibility(View.VISIBLE);
+
+        // 計算總遊戲時間（秒）
+        int totalPlayTime = (int) ((System.currentTimeMillis() - startTime) / 1000);
+        
+        // 計算分數（基於嘗試次數和時間）
+        int score = calculateScore(totalPlayTime);
+        
+        // 更新遊戲狀態和分數到數據庫
+        StatusManager.updateGameStatusToFinish(recordId, score, totalPlayTime);
+        
+        // 更新結束訊息
+        endMessage.setText(getString(R.string.game10_complete, totalPlayTime, tiltMazeView.getAttempts()));
+        
+        // 設置按鈕文字和行為
+        MaterialButton btnNextGame = findViewById(R.id.btn_next_game);
+        btnNextGame.setText(R.string.return_to_main_menu);
+        btnNextGame.setOnClickListener(v -> {
+            soundManager.playButtonClick();
+            // 禁用按鈕防止重複點擊
+            btnNextGame.setEnabled(false);
+            // 切換到主選單音樂
+            soundManager.switchBGM(R.raw.bgm_menu);
+            // 直接返回主選單
+            Intent intent = new Intent(this, MainMenuActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        // 創建對話框
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+
+        // 創建自定義標題視圖
+        TextView titleView = new TextView(this);
+        titleView.setText(R.string.exit_title);
+        titleView.setGravity(Gravity.START);  // 左對齊
+        titleView.setPadding(40, 30, 40, 10); // 減少標題和內容之間的間距
+        titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        titleView.setTextColor(Color.WHITE); // 白色標題
+        titleView.setTypeface(null, Typeface.BOLD);
+
+        // 創建自定義消息視圖
+        TextView messageView = new TextView(this);
+        messageView.setText(R.string.exit_message);
+        messageView.setGravity(Gravity.START);  // 左對齊
+        messageView.setPadding(40, 10, 40, 30); // 減少與標題的間距
+        messageView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        messageView.setTextColor(Color.WHITE); // 白色內容
+
+        builder.setCustomTitle(titleView)
+                .setView(messageView)
+                .setPositiveButton(R.string.exit_confirm, (dialog, which) -> {
+                    // 如果用戶確認要退出
+                    if (soundManager != null) {
+                        soundManager.stopBGM();
+                        soundManager.release();
+                    }
+                    // 完全退出應用程式
+                    finishAffinity();  // 結束所有活動
+                    System.exit(0);    // 確保完全退出
+                })
+                .setNegativeButton(R.string.exit_cancel, (dialog, which) -> {
+                    // 如果用戶取消，什麼都不做
+                    dialog.dismiss();
+                })
+                .setCancelable(false);  // 防止點擊對話框外部關閉
+
+        // 創建並顯示對話框
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+        // 設置對話框背景
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
+        }
+
+        // 設置按鈕文字顏色
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
+            Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+
+            if (positiveButton != null && negativeButton != null) {
+                // 確定按鈕設為綠色
+                positiveButton.setTextColor(getResources().getColor(R.color.dialog_confirm)); // 綠色
+                // 取消按鈕設為紅色
+                negativeButton.setTextColor(getResources().getColor(R.color.dialog_cancel)); // 紅色
+            }
+        });
+
+        dialog.show();
     }
 } 

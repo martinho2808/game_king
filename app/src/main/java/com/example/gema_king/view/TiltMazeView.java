@@ -29,24 +29,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TiltMazeView extends View implements SensorEventListener {
     private static final String TAG = "TiltMazeView";
     private static final float BALL_RADIUS = 20f;
-    private static final float WALL_THICKNESS = 15f;  // 增加牆壁厚度
+    private static final float WALL_THICKNESS = 20f;  // 增加牆壁厚度
     private static final float GOAL_RADIUS = 30f;
-    private static final float OBSTACLE_RADIUS = 20f;  // 減小障礙物半徑
-    private static final int MAZE_SIZE = 6;  // 增加到 6x6 網格
+    private static final float OBSTACLE_RADIUS = 20f;
+    private static final int MAZE_SIZE = 6;
     private static final float SENSITIVITY = 0.5f;
     private static final float FRICTION = 0.98f;
     private static final float BOUNCE_FACTOR = 0.7f;
     private static final float MIN_VELOCITY = 0.1f;
     private static final float MAX_VELOCITY = 15.0f;
-    private static final float SAFE_DISTANCE = 100f;  // 增加安全距離
+    private static final float SAFE_DISTANCE = 80f;  // 減少安全距離
     private static final int MAX_WALLS = 20;  // 增加最大牆壁數量
-    private static final float START_SAFE_DISTANCE = 120f;  // 增加起點安全距離
+    private static final float START_SAFE_DISTANCE = 100f;
+    private static final float TWO_PI = (float)(2 * Math.PI);  // 添加 TWO_PI 常量
 
     // 添加新的迷宮模式
     private static final int CROSS = 0;
-    private static final int SPIRAL = 1;
-    private static final int ZIGZAG = 2;
-    private static final int MAZE = 3;  // 新增迷宮模式
+    private static final int ZIGZAG = 1;
+    private static final int MAZE = 2;  // 新增迷宮模式
 
     private Paint ballPaint;
     private Paint wallPaint;
@@ -128,6 +128,10 @@ public class TiltMazeView extends View implements SensorEventListener {
         walls = new ArrayList<>();
         obstacles = new ArrayList<>();
         random = new Random();
+        
+        // 初始化起點和終點
+        start = new float[2];
+        goal = new float[2];
 
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -149,154 +153,384 @@ public class TiltMazeView extends View implements SensorEventListener {
             cellHeight = h / (float) MAZE_SIZE;
             mazeWidth = w;
             mazeHeight = h;
-            
-            // 只在遊戲開始時生成迷宮
-            if (isGameActive.get()) {
-                generateMaze();
-            }
         }
     }
 
     private void generateMaze() {
         if (isGeneratingMaze || mazeWidth <= 0 || mazeHeight <= 0) {
+            Log.e(TAG, "無法生成迷宮：尺寸無效或正在生成中");
             return;
         }
         isGeneratingMaze = true;
         
         executorService.execute(() -> {
-            try {
-                lock.writeLock().lock();
+            int maxRetries = 5;
+            int currentRetry = 0;
+            AtomicBoolean success = new AtomicBoolean(false);
+            
+            while (!success.get() && currentRetry < maxRetries) {
                 try {
-                    walls.clear();
-                    obstacles.clear();
-                    
-                    // 確保起點和終點在有效範圍內
-                    generateRandomStartAndGoal();
-                    
-                    // 隨機選擇迷宮模式
-                    mazePattern = random.nextInt(4);
-                    
-                    // 生成基本迷宮模式
-                    switch (mazePattern) {
-                        case CROSS:
-                            generateCrossPattern();
-                            break;
-                        case SPIRAL:
-                            generateSpiralPattern();
-                            break;
-                        case ZIGZAG:
-                            generateZigzagPattern();
-                            break;
-                        case MAZE:
-                            generateMazePattern();
-                            break;
+                    lock.writeLock().lock();
+                    try {
+                        walls.clear();
+                        obstacles.clear();
+                        
+                        // 隨機選擇迷宮模式
+                        mazePattern = random.nextInt(3);  // 改為3種模式
+                        Log.d(TAG, "選擇迷宮模式: " + mazePattern);
+                        
+                        float margin = Math.max(BALL_RADIUS * 3, GOAL_RADIUS * 3);
+                        margin = Math.min(margin, mazeWidth / 4);
+                        margin = Math.min(margin, mazeHeight / 4);
+                        
+                        // 設置起點和終點位置
+                        setupStartAndGoalPositions(margin);
+                        
+                        // 生成基本迷宮模式
+                        boolean generated = false;
+                        switch (mazePattern) {
+                            case CROSS:
+                                generated = generateCrossPattern();
+                                break;
+                            case ZIGZAG:
+                                generated = generateZigzagPattern();
+                                break;
+                            case MAZE:
+                                generated = generateMazePattern();
+                                break;
+                        }
+                        
+                        // 檢查是否成功生成了足夠的牆壁
+                        if (!generated || walls.size() < 5) {
+                            Log.d(TAG, "牆壁生成失敗或數量不足，重試");
+                            currentRetry++;
+                            continue;
+                        }
+                        
+                        // 確保有路徑到達終點
+                        if (!ensurePathToGoal()) {
+                            currentRetry++;
+                            continue;
+                        }
+                        
+                        // 添加動態障礙物
+                        addObstacles();
+                        
+                        // 檢查起點和終點是否與障礙物重疊
+                        if (checkObstacleOverlap()) {
+                            currentRetry++;
+                            continue;
+                        }
+                        
+                        // 重置球的位置
+                        resetBallPosition();
+                        
+                        success.set(true);
+                        Log.d(TAG, "成功生成迷宮，牆壁數量: " + walls.size());
+                    } finally {
+                        lock.writeLock().unlock();
                     }
-                    
-                    // 確保有路徑到達終點
-                    ensurePathToGoal();
-                    
-                    // 添加動態障礙物
-                    addDynamicObstacles();
-                    
-                    // 重置球的位置
-                    resetBallPosition();
-                    
-                } finally {
-                    lock.writeLock().unlock();
+                } catch (Exception e) {
+                    Log.e(TAG, "生成迷宮時發生錯誤", e);
+                    currentRetry++;
                 }
-                
-                mainHandler.post(() -> {
-                    isGeneratingMaze = false;
-                    invalidate();
-                });
-                
-            } catch (Exception e) {
-                Log.e(TAG, "生成迷宮時發生錯誤", e);
-                isGeneratingMaze = false;
             }
+            
+            mainHandler.post(() -> {
+                isGeneratingMaze = false;
+                if (success.get()) {
+                    invalidate();
+                } else {
+                    Log.d(TAG, "生成失敗，使用簡單迷宮");
+                    generateSimpleMaze();
+                }
+            });
         });
     }
 
-    private void generateRandomStartAndGoal() {
-        // 定義邊緣安全距離
-        float margin = Math.max(BALL_RADIUS * 3, GOAL_RADIUS * 3);
-        
-        // 確保 margin 不會超過 View 尺寸的一半
-        margin = Math.min(margin, mazeWidth / 4);
-        margin = Math.min(margin, mazeHeight / 4);
-        
-        // 隨機選擇起點和終點的位置類型
-        int startPos = random.nextInt(4);
-        int goalPos;
-        do {
-            goalPos = random.nextInt(4);
-        } while (goalPos == startPos);
-        
-        // 設置起點
-        switch (startPos) {
-            case 0:  // 左上
-                start = new float[]{
-                    margin + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    margin + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+    private void setupStartAndGoalPositions(float margin) {
+        // 隨機選擇起點位置（四個角落之一）
+        int startCorner = random.nextInt(4);
+        switch (startCorner) {
+            case 0: // 左上
+                start = new float[]{margin, margin};
                 break;
-            case 1:  // 右上
-                start = new float[]{
-                    mazeWidth * 2/3 + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    margin + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+            case 1: // 右上
+                start = new float[]{mazeWidth - margin, margin};
                 break;
-            case 2:  // 左下
-                start = new float[]{
-                    margin + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    mazeHeight * 2/3 + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+            case 2: // 左下
+                start = new float[]{margin, mazeHeight - margin};
                 break;
-            case 3:  // 右下
-                start = new float[]{
-                    mazeWidth * 2/3 + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    mazeHeight * 2/3 + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+            case 3: // 右下
+                start = new float[]{mazeWidth - margin, mazeHeight - margin};
                 break;
         }
         
-        // 設置終點
-        switch (goalPos) {
-            case 0:  // 左上
-                goal = new float[]{
-                    margin + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    margin + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+        // 設置終點位置（對角）
+        switch (startCorner) {
+            case 0: // 左上 -> 右下
+                goal = new float[]{mazeWidth - margin, mazeHeight - margin};
                 break;
-            case 1:  // 右上
-                goal = new float[]{
-                    mazeWidth * 2/3 + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    margin + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+            case 1: // 右上 -> 左下
+                goal = new float[]{margin, mazeHeight - margin};
                 break;
-            case 2:  // 左下
-                goal = new float[]{
-                    margin + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    mazeHeight * 2/3 + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+            case 2: // 左下 -> 右上
+                goal = new float[]{mazeWidth - margin, margin};
                 break;
-            case 3:  // 右下
-                goal = new float[]{
-                    mazeWidth * 2/3 + random.nextFloat() * (mazeWidth/3 - 2 * margin),
-                    mazeHeight * 2/3 + random.nextFloat() * (mazeHeight/3 - 2 * margin)
-                };
+            case 3: // 右下 -> 左上
+                goal = new float[]{margin, margin};
                 break;
-        }
-        
-        // 確保起點和終點不會太靠近
-        float minDistance = Math.min(mazeWidth, mazeHeight) / 3;
-        if (distance(start[0], start[1], goal[0], goal[1]) < minDistance) {
-            // 如果太靠近，重新生成終點
-            generateRandomStartAndGoal();
         }
     }
 
-    private void ensurePathToGoal() {
+    private boolean generateCrossPattern() {
+        float centerX = mazeWidth / 2f;
+        float centerY = mazeHeight / 2f;
+        float maxLength = Math.min(mazeWidth, mazeHeight) * 0.4f;
+        List<RectF> tempWalls = new ArrayList<>();
+        
+        // 在四個象限添加小十字
+        for (int quadrant = 0; quadrant < 4; quadrant++) {
+            float angle = quadrant * (float)Math.PI/2;
+            float crossOffset = maxLength * 0.6f;  // 增加偏移距離
+            float smallArmLength = maxLength * 0.3f;  // 減少小十字的臂長
+            
+            // 計算小十字的中心點
+            float smallCrossX = centerX + crossOffset * (float)Math.cos(angle);
+            float smallCrossY = centerY + crossOffset * (float)Math.sin(angle);
+            
+            // 小十字的水平臂
+            RectF smallHorizontal = new RectF(
+                smallCrossX - smallArmLength,
+                smallCrossY - WALL_THICKNESS/2,
+                smallCrossX + smallArmLength,
+                smallCrossY + WALL_THICKNESS/2
+            );
+            
+            // 小十字的垂直臂
+            RectF smallVertical = new RectF(
+                smallCrossX - WALL_THICKNESS/2,
+                smallCrossY - smallArmLength,
+                smallCrossX + WALL_THICKNESS/2,
+                smallCrossY + smallArmLength
+            );
+            
+            // 添加小十字
+            tempWalls.add(smallHorizontal);
+            tempWalls.add(smallVertical);
+        }
+        
+        // 檢查路徑是否可行
+        if (!ensurePathToGoal()) {
+            return false;
+        }
+        
+        walls.addAll(tempWalls);
+        return true;
+    }
+
+    private boolean generateZigzagPattern() {
+        List<RectF> tempWalls = new ArrayList<>();
+        float verticalSpacing = mazeHeight / 8f;
+        float horizontalSpacing = mazeWidth / 6f;
+        float wallLength = horizontalSpacing * 1.5f;
+        
+        // 生成水平之字形牆
+        for (int row = 1; row < 8; row++) {
+            float y = row * verticalSpacing;
+            boolean isRightToLeft = (row % 2 == 0);
+            
+            // 每行生成多段水平牆
+            for (int col = 0; col < 5; col++) {
+                float x = isRightToLeft ? 
+                    mazeWidth - (col * horizontalSpacing + horizontalSpacing) :
+                    col * horizontalSpacing + horizontalSpacing;
+                
+                RectF wall = new RectF(
+                    x - wallLength/2,
+                    y - WALL_THICKNESS/2,
+                    x + wallLength/2,
+                    y + WALL_THICKNESS/2
+                );
+                
+                tempWalls.add(wall);
+            }
+            
+            // 添加垂直連接
+            if (row < 7) {
+                float nextY = (row + 1) * verticalSpacing;
+                float x = isRightToLeft ? horizontalSpacing : mazeWidth - horizontalSpacing;
+                
+                RectF connector = new RectF(
+                    x - WALL_THICKNESS/2,
+                    y,
+                    x + WALL_THICKNESS/2,
+                    nextY
+                );
+                
+                tempWalls.add(connector);
+            }
+        }
+        
+        walls.addAll(tempWalls);
+        return true;
+    }
+
+    private boolean generateMazePattern() {
+        float margin = WALL_THICKNESS * 1.5f;  // 增加牆壁間距
+        float effectiveWidth = mazeWidth - margin * 2;
+        float effectiveHeight = mazeHeight - margin * 2;
+        float cellSize = Math.min(effectiveWidth, effectiveHeight) / 6f;
+        List<RectF> tempWalls = new ArrayList<>();
+        
+        // 計算起始位置，使網格居中
+        float startX = (mazeWidth - effectiveWidth) / 2;
+        float startY = (mazeHeight - effectiveHeight) / 2;
+        
+        // 生成外框
+        RectF leftBorder = new RectF(startX, startY, startX + WALL_THICKNESS, startY + effectiveHeight);
+        RectF rightBorder = new RectF(startX + effectiveWidth - WALL_THICKNESS, startY, startX + effectiveWidth, startY + effectiveHeight);
+        RectF topBorder = new RectF(startX, startY, startX + effectiveWidth, startY + WALL_THICKNESS);
+        RectF bottomBorder = new RectF(startX, startY + effectiveHeight - WALL_THICKNESS, startX + effectiveWidth, startY + effectiveHeight);
+        
+        tempWalls.add(leftBorder);
+        tempWalls.add(rightBorder);
+        tempWalls.add(topBorder);
+        tempWalls.add(bottomBorder);
+        
+        // 生成內部垂直牆
+        for (int i = 1; i < 6; i++) {
+            float x = startX + i * cellSize;
+            for (int j = 0; j < 5; j++) {
+                if (random.nextFloat() < 0.7f) {  // 降低牆壁生成機率
+                    float y = startY + j * cellSize;
+                    float length = cellSize * 0.8f;  // 縮短牆壁長度
+                    
+                    RectF wall = new RectF(
+                        x - WALL_THICKNESS/2,
+                        y + cellSize * 0.1f,  // 留出間距
+                        x + WALL_THICKNESS/2,
+                        y + length
+                    );
+                    
+                    if (!isWallBlockingPath(wall, start, goal) && !isWallOverlapping(wall)) {
+                        tempWalls.add(wall);
+                    }
+                }
+            }
+        }
+        
+        // 生成內部水平牆
+        for (int j = 1; j < 6; j++) {
+            float y = startY + j * cellSize;
+            for (int i = 0; i < 5; i++) {
+                if (random.nextFloat() < 0.7f) {  // 降低牆壁生成機率
+                    float x = startX + i * cellSize;
+                    float length = cellSize * 0.8f;  // 縮短牆壁長度
+                    
+                    RectF wall = new RectF(
+                        x + cellSize * 0.1f,  // 留出間距
+                        y - WALL_THICKNESS/2,
+                        x + length,
+                        y + WALL_THICKNESS/2
+                    );
+                    
+                    if (!isWallBlockingPath(wall, start, goal) && !isWallOverlapping(wall)) {
+                        tempWalls.add(wall);
+                    }
+                }
+            }
+        }
+        
+        // 確保路徑可達
+        if (!ensurePathExists()) {
+            return false;
+        }
+        
+        if (tempWalls.size() >= 15) {
+            walls.addAll(tempWalls);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean ensurePathExists() {
+        // 使用簡單的路徑檢查：確保從起點到終點有一條大致的通路
+        float dx = goal[0] - start[0];
+        float dy = goal[1] - start[1];
+        float distance = (float)Math.sqrt(dx * dx + dy * dy);
+        
+        // 檢查路徑上的障礙物密度
+        int numChecks = 10;
+        float stepX = dx / numChecks;
+        float stepY = dy / numChecks;
+        int blockedPoints = 0;
+        
+        for (int i = 1; i < numChecks; i++) {
+            float checkX = start[0] + stepX * i;
+            float checkY = start[1] + stepY * i;
+            float checkRadius = BALL_RADIUS * 2;
+            
+            // 檢查點周圍是否有太多牆壁
+            int wallsNearby = 0;
+            for (RectF wall : walls) {
+                if (distanceToWall(checkX, checkY, wall) < checkRadius) {
+                    wallsNearby++;
+                }
+            }
+            
+            if (wallsNearby > 2) { // 如果一個檢查點周圍有超過2個牆壁，認為該點被阻塞
+                blockedPoints++;
+            }
+        }
+        
+        // 如果被阻塞的點太多，認為路徑不可達
+        return blockedPoints < numChecks / 2;
+    }
+
+    // 新增計算兩個牆之間最小距離的方法
+    private float getMinWallDistance(RectF wall1, RectF wall2) {
+        float[] points1 = {
+            wall1.left, wall1.top,
+            wall1.right, wall1.top,
+            wall1.right, wall1.bottom,
+            wall1.left, wall1.bottom
+        };
+        
+        float[] points2 = {
+            wall2.left, wall2.top,
+            wall2.right, wall2.top,
+            wall2.right, wall2.bottom,
+            wall2.left, wall2.bottom
+        };
+        
+        float minDistance = Float.MAX_VALUE;
+        
+        // 計算所有頂點之間的最小距離
+        for (int i = 0; i < points1.length; i += 2) {
+            for (int j = 0; j < points2.length; j += 2) {
+                float distance = (float) Math.sqrt(
+                    Math.pow(points1[i] - points2[j], 2) +
+                    Math.pow(points1[i+1] - points2[j+1], 2)
+                );
+                minDistance = Math.min(minDistance, distance);
+            }
+        }
+        
+        return minDistance;
+    }
+
+    private boolean checkObstacleOverlap() {
+        for (float[] obstacle : obstacles) {
+            if (distance(start[0], start[1], obstacle[0], obstacle[1]) < SAFE_DISTANCE ||
+                distance(goal[0], goal[1], obstacle[0], obstacle[1]) < SAFE_DISTANCE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean ensurePathToGoal() {
         // 檢查起點到終點是否有直接路徑
         boolean hasDirectPath = true;
         for (RectF wall : walls) {
@@ -317,7 +551,16 @@ public class TiltMazeView extends View implements SensorEventListener {
                 rectIntersectsWithLine(wall, start[0], start[1], midX, midY) ||
                 rectIntersectsWithLine(wall, midX, midY, goal[0], goal[1])
             );
+            
+            // 再次檢查路徑是否可行
+            for (RectF wall : walls) {
+                if (rectIntersectsWithLine(wall, start[0], start[1], goal[0], goal[1])) {
+                    return false;
+                }
+            }
         }
+        
+        return true;
     }
 
     // 添加檢查矩形是否與線段相交的方法
@@ -361,28 +604,54 @@ public class TiltMazeView extends View implements SensorEventListener {
     }
 
     private void addObstacles() {
-        int maxObstacles = 5;
-        int attempts = 0;
-        int maxAttempts = 50;
+        int numObstacles;
+        if (mazePattern == CROSS) {
+            numObstacles = 12 + random.nextInt(4);  // 十字型迷宮增加障礙物數量到12-15個
+        } else {
+            numObstacles = 6 + random.nextInt(3);  // 其他模式保持6-8個
+        }
         
-        while (obstacles.size() < maxObstacles && attempts < maxAttempts) {
-            float x = random.nextFloat() * (getWidth() - 200f) + 100f;
-            float y = random.nextFloat() * (getHeight() - 200f) + 100f;
+        float margin = 100f;
+        
+        for (int i = 0; i < numObstacles; i++) {
+            float x, y;
+            boolean validPosition;
+            int attempts = 0;
             
-            // 確保障礙物不會太靠近起點和終點
-            if (Math.abs(x - ballX) < SAFE_DISTANCE * 2 || 
-                Math.abs(y - ballY) < SAFE_DISTANCE * 2 ||
-                Math.abs(x - goal[0]) < SAFE_DISTANCE * 2 || 
-                Math.abs(y - goal[1]) < SAFE_DISTANCE * 2) {
+            do {
+                validPosition = true;
+                x = margin + random.nextFloat() * (getWidth() - 2 * margin);
+                y = margin + random.nextFloat() * (getHeight() - 2 * margin);
+                
+                // 檢查與起點和終點的距離
+                if (distance(x, y, start[0], start[1]) < START_SAFE_DISTANCE ||
+                    distance(x, y, goal[0], goal[1]) < START_SAFE_DISTANCE) {
+                    validPosition = false;
+                    continue;
+                }
+                
+                // 檢查與其他障礙物的距離
+                for (float[] obstacle : obstacles) {
+                    if (distance(x, y, obstacle[0], obstacle[1]) < SAFE_DISTANCE) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+                
+                // 檢查與牆壁的距離
+                for (RectF wall : walls) {
+                    if (distanceToWall(x, y, wall) < SAFE_DISTANCE) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+                
                 attempts++;
-                continue;
-            }
+            } while (!validPosition && attempts < 30);
             
-            // 確保障礙物不會擋住主要路徑
-            if (!isObstacleBlockingPath(x, y)) {
+            if (validPosition) {
                 obstacles.add(new float[]{x, y});
             }
-            attempts++;
         }
     }
 
@@ -530,16 +799,36 @@ public class TiltMazeView extends View implements SensorEventListener {
 
     public void startGame() {
         Log.d(TAG, "開始遊戲");
+        if (mazeWidth <= 0 || mazeHeight <= 0) {
+            Log.e(TAG, "無法開始遊戲：迷宮尺寸無效");
+            return;
+        }
+        
+        // 確保所有必要的組件都已初始化
+        if (walls == null || obstacles == null || start == null || goal == null) {
+            Log.e(TAG, "無法開始遊戲：組件未初始化");
+            init();
+        }
+        
         isGameActive.set(true);
         attempts = 0;
         isGameCompleted = false;
+        
+        // 清除現有的牆壁和障礙物
+        walls.clear();
+        obstacles.clear();
+        
+        // 生成新的迷宮
         generateMaze();
+        
+        // 註冊感應器
         if (sensorManager != null && accelerometer != null) {
             boolean registered = sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
             Log.d(TAG, "註冊加速度計: " + registered);
         } else {
             Log.e(TAG, "無法註冊加速度計: sensorManager=" + (sensorManager != null) + ", accelerometer=" + (accelerometer != null));
         }
+        
         invalidate();
     }
 
@@ -734,200 +1023,213 @@ public class TiltMazeView extends View implements SensorEventListener {
         }
     }
 
-    private void generateCrossPattern() {
-        float centerX = getWidth() / 2f;
-        float centerY = getHeight() / 2f;
-        float wallLength = Math.min(getWidth(), getHeight()) * 0.7f;
-        float gapSize = 80f;
+    private boolean addLWall(float x, float y, float length, float rotationDegrees) {
+        float rad = (float) Math.toRadians(rotationDegrees);
+        float cos = (float) Math.cos(rad);
+        float sin = (float) Math.sin(rad);
         
-        // 創建十字形狀，但有多個缺口
-        // 水平牆
-        for (int i = 0; i < 3; i++) {
-            float segmentLength = wallLength / 3;
-            float startX = centerX - wallLength/2 + i * segmentLength;
-            walls.add(new RectF(startX + gapSize/2, centerY - WALL_THICKNESS,
-                              startX + segmentLength - gapSize/2, centerY + WALL_THICKNESS));
+        // 水平部分
+        float x1 = x - length/2 * cos;
+        float y1 = y - length/2 * sin;
+        float x2 = x + length/2 * cos;
+        float y2 = y + length/2 * sin;
+        
+        RectF horizontalWall = new RectF(
+            Math.min(x1, x2) - WALL_THICKNESS/2,
+            Math.min(y1, y2) - WALL_THICKNESS/2,
+            Math.max(x1, x2) + WALL_THICKNESS/2,
+            Math.max(y1, y2) + WALL_THICKNESS/2
+        );
+        
+        // 垂直部分
+        float perpRad = rad + (float) Math.PI/2;
+        float x3 = x2 + length/2 * (float)Math.cos(perpRad);
+        float y3 = y2 + length/2 * (float)Math.sin(perpRad);
+        
+        RectF verticalWall = new RectF(
+            Math.min(x2, x3) - WALL_THICKNESS/2,
+            Math.min(y2, y3) - WALL_THICKNESS/2,
+            Math.max(x2, x3) + WALL_THICKNESS/2,
+            Math.max(y2, y3) + WALL_THICKNESS/2
+        );
+        
+        if (!isWallCompletelyBlockingPath(horizontalWall)) {
+            walls.add(horizontalWall);
+        }
+        if (!isWallCompletelyBlockingPath(verticalWall)) {
+            walls.add(verticalWall);
         }
         
-        // 垂直牆
-        for (int i = 0; i < 3; i++) {
-            float segmentLength = wallLength / 3;
-            float startY = centerY - wallLength/2 + i * segmentLength;
-            walls.add(new RectF(centerX - WALL_THICKNESS, startY + gapSize/2,
-                              centerX + WALL_THICKNESS, startY + segmentLength - gapSize/2));
-        }
-        
-        // 添加一些額外的小牆段增加難度
-        for (int i = 0; i < 4; i++) {
-            float x = random.nextFloat() * (getWidth() - 200) + 100;
-            float y = random.nextFloat() * (getHeight() - 200) + 100;
-            float length = 100f + random.nextFloat() * 100f;
-            
-            if (random.nextBoolean()) {
-                // 水平牆
-                walls.add(new RectF(x, y, x + length, y + WALL_THICKNESS));
-            } else {
-                // 垂直牆
-                walls.add(new RectF(x, y, x + WALL_THICKNESS, y + length));
-            }
-        }
+        return walls.size() >= 6; // 至少有主十字和4個L形牆
     }
 
-    private void generateSpiralPattern() {
-        float centerX = getWidth() / 2f;
-        float centerY = getHeight() / 2f;
-        float maxRadius = Math.min(getWidth(), getHeight()) * 0.4f;
-        float spacing = maxRadius / 4;
+    private boolean isWallCompletelyBlockingPath(RectF wall) {
+        // 檢查牆是否完全阻擋了起點到終點的路徑
+        float margin = BALL_RADIUS * 2;
         
-        // 生成螺旋形狀的牆，每圈都有缺口
-        for (int i = 1; i <= 4; i++) {
-            float radius = spacing * i;
-            float gapSize = 70f;
-            float gapRotation = (float) (Math.PI / 2 * i); // 每層缺口旋轉90度
+        // 計算牆的中心點
+        float wallCenterX = (wall.left + wall.right) / 2;
+        float wallCenterY = (wall.top + wall.bottom) / 2;
+        
+        // 計算起點和終點到牆中心的向量
+        float startToWallX = wallCenterX - start[0];
+        float startToWallY = wallCenterY - start[1];
+        float goalToWallX = wallCenterX - goal[0];
+        float goalToWallY = wallCenterY - goal[1];
+        
+        // 計算向量的點積
+        float dotProduct = startToWallX * goalToWallX + startToWallY * goalToWallY;
+        float startDist = (float) Math.sqrt(startToWallX * startToWallX + startToWallY * startToWallY);
+        float goalDist = (float) Math.sqrt(goalToWallX * goalToWallX + goalToWallY * goalToWallY);
+        
+        // 如果點積為負，表示起點和終點在牆的不同側
+        if (dotProduct < 0) {
+            // 檢查牆是否太靠近起點或終點
+            float distToStart = distanceToWall(start[0], start[1], wall);
+            float distToGoal = distanceToWall(goal[0], goal[1], wall);
             
-            for (int angle = 0; angle < 360; angle += 30) {
-                float rad = (float) Math.toRadians(angle);
-                float nextRad = (float) Math.toRadians(angle + 30);
-                
-                // 檢查是否需要在此處創建缺口
-                if (Math.abs(rad - gapRotation) % (Math.PI * 2) > 0.5) {
-                    float x1 = centerX + (float) (radius * Math.cos(rad));
-                    float y1 = centerY + (float) (radius * Math.sin(rad));
-                    float x2 = centerX + (float) (radius * Math.cos(nextRad));
-                    float y2 = centerY + (float) (radius * Math.sin(nextRad));
-                    
-                    walls.add(new RectF(
-                        Math.min(x1, x2), Math.min(y1, y2),
-                        Math.max(x1, x2), Math.max(y1, y2)
-                    ));
-                }
-            }
+            return distToStart < margin || distToGoal < margin;
         }
+        
+        return false;
     }
 
-    private void generateZigzagPattern() {
-        float spacing = getHeight() / 7f;
-        float wallThickness = WALL_THICKNESS;
-        float gapSize = 90f;
-        
-        // 生成不規則的之字形牆
-        for (int i = 1; i < 6; i++) {
-            float y = spacing * i;
-            float offset = (i % 2 == 0) ? 50f : -50f; // 交替偏移
-            
-            // 分段生成牆，確保有多個通道
-            float[] segments = {0f, getWidth() * 0.33f, getWidth() * 0.66f, getWidth()};
-            for (int j = 0; j < segments.length - 1; j++) {
-                float startX = segments[j];
-                float endX = segments[j + 1];
-                
-                if (random.nextFloat() > 0.3f) { // 70%的機率生成牆
-                    walls.add(new RectF(
-                        startX + gapSize + offset,
-                        y - wallThickness,
-                        endX - gapSize + offset,
-                        y + wallThickness
-                    ));
-                }
-            }
-            
-            // 添加一些垂直連接
-            if (i < 5 && random.nextFloat() > 0.5f) {
-                float x = segments[random.nextInt(segments.length - 1)] + offset;
-                walls.add(new RectF(
-                    x - wallThickness,
-                    y,
-                    x + wallThickness,
-                    y + spacing
-                ));
-            }
-        }
-    }
-
-    private void generateMazePattern() {
-        float cellSize = Math.min(getWidth(), getHeight()) / MAZE_SIZE;
-        float wallThickness = WALL_THICKNESS;
-        
-        // 創建網格式迷宮
-        for (int i = 0; i < MAZE_SIZE; i++) {
-            for (int j = 0; j < MAZE_SIZE; j++) {
-                if (random.nextFloat() > 0.7f) { // 30%的機率生成牆
-                    // 隨機選擇水平或垂直牆
-                    if (random.nextBoolean()) {
-                        // 水平牆
-                        walls.add(new RectF(
-                            i * cellSize,
-                            j * cellSize,
-                            (i + 1) * cellSize - 40f,
-                            j * cellSize + wallThickness
-                        ));
-                    } else {
-                        // 垂直牆
-                        walls.add(new RectF(
-                            i * cellSize,
-                            j * cellSize,
-                            i * cellSize + wallThickness,
-                            (j + 1) * cellSize - 40f
-                        ));
-                    }
-                }
-            }
-        }
-    }
-
-    private void addDynamicObstacles() {
-        int numObstacles = 4 + random.nextInt(3); // 4-6個障礙物
-        float margin = 80f;
-        
-        for (int i = 0; i < numObstacles; i++) {
-            float x, y;
-            boolean validPosition;
-            int attempts = 0;
-            
-            do {
-                validPosition = true;
-                x = margin + random.nextFloat() * (getWidth() - 2 * margin);
-                y = margin + random.nextFloat() * (getHeight() - 2 * margin);
-                
-                // 檢查與起點和終點的距離
-                if (distance(x, y, start[0], start[1]) < START_SAFE_DISTANCE ||
-                    distance(x, y, goal[0], goal[1]) < START_SAFE_DISTANCE) {
-                    validPosition = false;
-                    continue;
-                }
-                
-                // 檢查與其他障礙物的距離
-                for (float[] obstacle : obstacles) {
-                    if (distance(x, y, obstacle[0], obstacle[1]) < SAFE_DISTANCE) {
-                        validPosition = false;
-                        break;
-                    }
-                }
-                
-                // 檢查與牆壁的距離
-                for (RectF wall : walls) {
-                    if (distanceToWall(x, y, wall) < SAFE_DISTANCE) {
-                        validPosition = false;
-                        break;
-                    }
-                }
-                
-                attempts++;
-            } while (!validPosition && attempts < 10);
-            
-            if (validPosition) {
-                obstacles.add(new float[]{x, y});
-            }
-        }
+    private float distanceToWall(float x, float y, RectF wall) {
+        float closestX = Math.max(wall.left, Math.min(x, wall.right));
+        float closestY = Math.max(wall.top, Math.min(y, wall.bottom));
+        float dx = x - closestX;
+        float dy = y - closestY;
+        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
     private float distance(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 
-    private float distanceToWall(float x, float y, RectF wall) {
-        float dx = Math.max(wall.left - x, Math.max(0, x - wall.right));
-        float dy = Math.max(wall.top - y, Math.max(0, y - wall.bottom));
-        return (float) Math.sqrt(dx * dx + dy * dy);
+    private void generateSimpleMaze() {
+        // 生成一個簡單的迷宮，確保遊戲可以進行
+        walls.clear();
+        obstacles.clear();
+        
+        // 在中心位置添加一個簡單的十字形牆
+        float centerX = mazeWidth / 2;
+        float centerY = mazeHeight / 2;
+        float wallLength = Math.min(mazeWidth, mazeHeight) * 0.3f;
+        
+        // 水平牆
+        RectF horizontalWall = new RectF(
+            centerX - wallLength/2,
+            centerY - WALL_THICKNESS,
+            centerX + wallLength/2,
+            centerY + WALL_THICKNESS
+        );
+        
+        if (!isWallOverlapping(horizontalWall)) {
+            walls.add(horizontalWall);
+        }
+        
+        // 垂直牆
+        RectF verticalWall = new RectF(
+            centerX - WALL_THICKNESS,
+            centerY - wallLength/2,
+            centerX + WALL_THICKNESS,
+            centerY + wallLength/2
+        );
+        
+        if (!isWallOverlapping(verticalWall)) {
+            walls.add(verticalWall);
+        }
+        
+        // 重置球的位置
+        resetBallPosition();
+    }
+
+    // 添加檢查牆壁是否重疊的方法
+    private boolean isWallOverlapping(RectF newWall) {
+        // 檢查與現有牆壁的重疊
+        for (RectF wall : walls) {
+            if (RectF.intersects(newWall, wall)) {
+                return true;
+            }
+        }
+        
+        // 檢查與起點和終點的距離
+        float[] points = {start[0], start[1], goal[0], goal[1]};
+        for (int i = 0; i < points.length; i += 2) {
+            if (newWall.contains(points[i], points[i + 1])) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private boolean isWallBlockingPath(RectF wall, float[] start, float[] goal) {
+        float margin = BALL_RADIUS * 3;
+        
+        // 檢查牆是否太靠近起點或終點
+        if (distanceToWall(start[0], start[1], wall) < margin ||
+            distanceToWall(goal[0], goal[1], wall) < margin) {
+            return true;
+        }
+        
+        // 檢查牆是否直接阻擋路徑
+        float wallCenterX = (wall.left + wall.right) / 2;
+        float wallCenterY = (wall.top + wall.bottom) / 2;
+        
+        // 計算向量
+        float pathX = goal[0] - start[0];
+        float pathY = goal[1] - start[1];
+        float wallX = wallCenterX - start[0];
+        float wallY = wallCenterY - start[1];
+        
+        // 計算投影
+        float pathLength = (float) Math.sqrt(pathX * pathX + pathY * pathY);
+        float projection = (pathX * wallX + pathY * wallY) / pathLength;
+        
+        // 如果投影在路徑上且距離小於安全距離，則視為阻擋
+        return projection > 0 && projection < pathLength && 
+               Math.abs(pathX * wallY - pathY * wallX) / pathLength < margin;
+    }
+
+    // 更新牆壁重疊檢查方法
+    private boolean isWallsOverlapping(RectF wall1, RectF wall2) {
+        if (!RectF.intersects(wall1, wall2)) {
+            return false;
+        }
+        
+        // 計算重疊區域
+        float overlapLeft = Math.max(wall1.left, wall2.left);
+        float overlapRight = Math.min(wall1.right, wall2.right);
+        float overlapTop = Math.max(wall1.top, wall2.top);
+        float overlapBottom = Math.min(wall1.bottom, wall2.bottom);
+        
+        float overlapArea = (overlapRight - overlapLeft) * (overlapBottom - overlapTop);
+        float wall1Area = (wall1.right - wall1.left) * (wall1.bottom - wall1.top);
+        float wall2Area = (wall2.right - wall2.left) * (wall2.bottom - wall2.top);
+        float minArea = Math.min(wall1Area, wall2Area);
+        
+        return overlapArea > (minArea * 0.1f);  // 允許10%的重疊
+    }
+
+    public void resumeGame() {
+        Log.d(TAG, "恢復遊戲");
+        if (mazeWidth <= 0 || mazeHeight <= 0) {
+            Log.e(TAG, "無法恢復遊戲：迷宮尺寸無效");
+            return;
+        }
+        
+        isGameActive.set(true);
+        isGameCompleted = false;
+        
+        // 註冊感應器
+        if (sensorManager != null && accelerometer != null) {
+            boolean registered = sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+            Log.d(TAG, "註冊加速度計: " + registered);
+        } else {
+            Log.e(TAG, "無法註冊加速度計: sensorManager=" + (sensorManager != null) + ", accelerometer=" + (accelerometer != null));
+        }
+        
+        invalidate();
     }
 } 

@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.content.SharedPreferences;
 import java.util.HashMap;
+import com.example.gema_king.model.UserSession;
 
 public class SoundManager {
     private static final String TAG = "SoundManager";
@@ -165,25 +166,36 @@ public class SoundManager {
                     
                     // 設置準備完成的監聽器
                     bgmPlayer.setOnPreparedListener(mp -> {
-                        bgmPlayer.start();
+                        Log.d(TAG, "BGM prepared, starting playback");
+                        mp.start();
                         isBGMPlaying = true;
-                        Log.d(TAG, "Successfully switched BGM to: " + newBGM);
                     });
                     
                     // 設置錯誤監聽器
                     bgmPlayer.setOnErrorListener((mp, what, extra) -> {
                         Log.e(TAG, "MediaPlayer error: " + what + ", " + extra);
                         isBGMPlaying = false;
-                        currentBGM = oldBGM;  // 恢復原來的BGM
+                        // 嘗試重新創建播放器
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            startBGM();
+                        }, 1000);
                         return true;
                     });
                     
+                    // 準備播放
                     bgmPlayer.prepareAsync();
-
+                    
                 } catch (Exception e) {
                     Log.e(TAG, "Error switching BGM: " + e.getMessage());
-                    currentBGM = oldBGM;  // 恢復原來的BGM
-                    startBGM();  // 嘗試重新啟動原來的BGM
+                    e.printStackTrace();
+                    // 延遲重試
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (bgmPlayer != null) {
+                            bgmPlayer.release();
+                            bgmPlayer = null;
+                        }
+                        startBGM();
+                    }, 1000);
                 }
             }
         }
@@ -284,6 +296,14 @@ public class SoundManager {
     public void setBGMEnabled(boolean enabled) {
         isBGMEnabled = enabled;
         if (enabled) {
+            // 檢查是否有用戶會話
+            if (UserSession.getUserId(context) > 0) {
+                // 如果有用戶會話，播放主選單音樂
+                currentBGM = R.raw.bgm_menu;
+            } else {
+                // 如果沒有用戶會話，播放主畫面音樂
+                currentBGM = R.raw.bgm_main;
+            }
             startBGM();
         } else {
             stopBGM();

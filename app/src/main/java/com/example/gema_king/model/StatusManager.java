@@ -55,12 +55,10 @@ public class StatusManager {
         } else if (score == gameStatus.getScore()){
             updatePlayTime = Math.min(gameStatus.getPlayTime(), playTime);
         } else {
-            updatePlayTime = playTime;
+            updatePlayTime = gameStatus.getPlayTime();
         }
 
-
         dbHelper.updateStatusById(recordId, game_finished, updateScore, updatePlayTime);
-
     }
 
     public static void updateGamePlayed(int userId){
